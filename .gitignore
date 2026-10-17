@@ -7,3 +7,8 @@ out/
 /uploads/
 next-env.d.ts
 *.tsbuildinfo
+# Photos de travail des tableaux (seule la structure est versionnée)
+/photos-tableaux/**/*
+!/photos-tableaux/README.md
+!/photos-tableaux/*/
+!/photos-tableaux/*/.gitkeep
