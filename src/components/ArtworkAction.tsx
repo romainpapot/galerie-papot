@@ -1,13 +1,18 @@
 import Link from "next/link";
+import { getDictionary } from "@/lib/dictionaries";
+import { localePath, type Locale } from "@/lib/i18n";
 import type { ArtworkStatus } from "@/lib/status";
 
 /** Bouton de contact conditionné par le statut de l'œuvre. */
-export function ArtworkAction({ id, status }: { id: number; status: ArtworkStatus }) {
+export function ArtworkAction({ id, status, lang }: { id: number; status: ArtworkStatus; lang: Locale }) {
+  const t = getDictionary(lang).action;
+  const contact = (query: string) => localePath(lang, `/contact?${query}`);
+
   switch (status) {
     case "DISPONIBLE":
       return (
-        <Link href={`/contact?oeuvre=${id}`} className="btn btn-primary w-full sm:w-auto">
-          Se positionner / Contacter la galerie
+        <Link href={contact(`oeuvre=${id}`)} className="btn btn-primary w-full sm:w-auto">
+          {t.contact}
         </Link>
       );
 
@@ -15,12 +20,12 @@ export function ArtworkAction({ id, status }: { id: number; status: ArtworkStatu
       return (
         <div className="space-y-3">
           <button type="button" disabled className="btn btn-primary w-full sm:w-auto">
-            Actuellement réservé
+            {t.reserved}
           </button>
           <p className="text-sm text-muted">
-            Une option est en cours sur cette œuvre.{" "}
-            <Link href={`/contact?oeuvre=${id}&objet=attente`} className="text-ink underline underline-offset-4">
-              Être placé en liste d&apos;attente
+            {t.reservedNote}{" "}
+            <Link href={contact(`oeuvre=${id}&objet=attente`)} className="text-ink underline underline-offset-4">
+              {t.waitlist}
             </Link>
           </p>
         </div>
@@ -29,11 +34,11 @@ export function ArtworkAction({ id, status }: { id: number; status: ArtworkStatu
     case "VENDU":
       return (
         <div className="space-y-3">
-          <p className="font-serif text-2xl italic">Œuvre vendue</p>
+          <p className="font-serif text-2xl italic">{t.sold}</p>
           <p className="text-sm text-muted">
-            Cette œuvre a trouvé sa place chez un collectionneur.{" "}
-            <Link href={`/contact?oeuvre=${id}&objet=similaire`} className="text-ink underline underline-offset-4">
-              Demander une réédition ou une œuvre dans le même esprit
+            {t.soldNote}{" "}
+            <Link href={contact(`oeuvre=${id}&objet=similaire`)} className="text-ink underline underline-offset-4">
+              {t.similar}
             </Link>
           </p>
         </div>

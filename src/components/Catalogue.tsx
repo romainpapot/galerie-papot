@@ -3,21 +3,24 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { ArtworkCardData } from "@/lib/artworks";
+import { getDictionary } from "@/lib/dictionaries";
+import type { Locale } from "@/lib/i18n";
 import type { ArtworkStatus } from "@/lib/status";
 import { ArtworkCard } from "./ArtworkCard";
 
 type Props = {
   artworks: ArtworkCardData[];
   themes: { name: string; slug: string }[];
+  lang: Locale;
 };
 
-const AVAILABILITY: { value: "" | ArtworkStatus; label: string }[] = [
-  { value: "", label: "Toutes" },
-  { value: "DISPONIBLE", label: "Disponibles" },
-];
-
 /** Filtrage instantané côté client, synchronisé avec l'URL (?theme=…). */
-export function Catalogue({ artworks, themes }: Props) {
+export function Catalogue({ artworks, themes, lang }: Props) {
+  const t = getDictionary(lang).catalogue;
+  const availability: { value: "" | ArtworkStatus; label: string }[] = [
+    { value: "", label: t.all },
+    { value: "DISPONIBLE", label: t.available },
+  ];
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -52,9 +55,9 @@ export function Catalogue({ artworks, themes }: Props) {
     <>
       <div className="sticky top-16 z-30 -mx-5 mb-8 border-b border-line/70 bg-paper/90 px-5 py-3 backdrop-blur sm:-mx-8 sm:px-8">
         <div className="flex items-center justify-between gap-4">
-          <div className="-my-1 flex gap-2 overflow-x-auto py-1 [scrollbar-width:none]" role="group" aria-label="Filtrer par thème">
+          <div className="-my-1 flex gap-2 overflow-x-auto py-1 [scrollbar-width:none]" role="group" aria-label={t.filterByTheme}>
             <button type="button" className={chip(!theme)} aria-pressed={!theme} onClick={() => update({ theme: "" })}>
-              Tous les thèmes
+              {t.allThemes}
             </button>
             {themes.map((t) => (
               <button
@@ -75,11 +78,11 @@ export function Catalogue({ artworks, themes }: Props) {
               checked={status === "DISPONIBLE"}
               onChange={(e) => update({ status: e.target.checked ? "DISPONIBLE" : "" })}
             />
-            Disponibles uniquement
+            {t.availableOnly}
           </label>
         </div>
-        <div className="mt-2 flex gap-2 sm:hidden" role="group" aria-label="Disponibilité">
-          {AVAILABILITY.map((o) => (
+        <div className="mt-2 flex gap-2 sm:hidden" role="group" aria-label={t.availability}>
+          {availability.map((o) => (
             <button
               key={o.value}
               type="button"
@@ -93,17 +96,17 @@ export function Catalogue({ artworks, themes }: Props) {
       </div>
 
       <p className="mb-6 text-sm text-muted" aria-live="polite">
-        {visible.length} œuvre{visible.length > 1 ? "s" : ""}
+        {t.count(visible.length)}
       </p>
 
       {visible.length ? (
         <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-3 xl:grid-cols-4">
           {visible.map((a, i) => (
-            <ArtworkCard key={a.id} artwork={a} priority={i < 4} />
+            <ArtworkCard key={a.id} artwork={a} lang={lang} priority={i < 4} />
           ))}
         </div>
       ) : (
-        <p className="py-20 text-center text-muted">Aucune œuvre ne correspond à ces critères.</p>
+        <p className="py-20 text-center text-muted">{t.empty}</p>
       )}
     </>
   );

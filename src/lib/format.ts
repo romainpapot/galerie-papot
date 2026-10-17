@@ -1,12 +1,14 @@
-const priceFormatter = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
+import { getDictionary } from "./dictionaries";
+import type { Locale } from "./i18n";
 
-export function formatPrice(price: number | null | undefined) {
-  if (price == null) return "Prix sur demande";
-  return priceFormatter.format(price);
+const priceFormatters: Record<Locale, Intl.NumberFormat> = {
+  fr: new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
+  en: new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
+};
+
+export function formatPrice(price: number | null | undefined, lang: Locale = "fr") {
+  if (price == null) return getDictionary(lang).priceOnRequest;
+  return priceFormatters[lang].format(price);
 }
 
 /** Référence lisible d'une œuvre, utilisée dans les demandes de contact. */

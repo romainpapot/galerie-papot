@@ -1,14 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ArtworkCardData } from "@/lib/artworks";
+import { getDictionary } from "@/lib/dictionaries";
 import { formatPrice } from "@/lib/format";
+import { localePath, type Locale } from "@/lib/i18n";
 import { StatusBadge } from "./StatusBadge";
 
-export function ArtworkCard({ artwork, priority = false }: { artwork: ArtworkCardData; priority?: boolean }) {
+type Props = { artwork: ArtworkCardData; lang: Locale; priority?: boolean };
+
+export function ArtworkCard({ artwork, lang, priority = false }: Props) {
   const sold = artwork.status === "VENDU";
+  const t = getDictionary(lang).card;
 
   return (
-    <Link href={`/oeuvres/${artwork.slug}`} className="group block focus-visible:outline-none">
+    <Link href={localePath(lang, `/oeuvres/${artwork.slug}`)} className="group block focus-visible:outline-none">
       <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-line/50 ring-ink/30 group-focus-visible:ring-2">
         {artwork.imageUrl && (
           <Image
@@ -23,10 +28,10 @@ export function ArtworkCard({ artwork, priority = false }: { artwork: ArtworkCar
           />
         )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          <StatusBadge status={artwork.status} />
+          <StatusBadge status={artwork.status} lang={lang} />
           {artwork.isNew && !sold && (
             <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium tracking-wider text-ink uppercase ring-1 ring-ink/10 backdrop-blur">
-              Nouveau
+              {t.new}
             </span>
           )}
         </div>
@@ -38,7 +43,7 @@ export function ArtworkCard({ artwork, priority = false }: { artwork: ArtworkCar
         <h3 className="font-serif text-xl leading-tight group-hover:underline group-hover:underline-offset-4 decoration-1">
           {artwork.title}
         </h3>
-        <p className="text-sm text-muted">{sold ? "Œuvre vendue" : formatPrice(artwork.price)}</p>
+        <p className="text-sm text-muted">{sold ? t.sold : formatPrice(artwork.price, lang)}</p>
       </div>
     </Link>
   );

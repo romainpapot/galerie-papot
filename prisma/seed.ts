@@ -50,10 +50,10 @@ async function demoImage(name: string, palette: string[], w: number, h: number, 
 }
 
 const themes = [
-  { name: "Voitures", slug: "voitures" },
-  { name: "Fruits", slug: "fruits" },
-  { name: "Animaux", slug: "animaux" },
-  { name: "Portraits", slug: "portraits" },
+  { name: "Voitures", nameEn: "Cars", slug: "voitures" },
+  { name: "Fruits", nameEn: "Fruit", slug: "fruits" },
+  { name: "Animaux", nameEn: "Animals", slug: "animaux" },
+  { name: "Portraits", nameEn: "Portraits", slug: "portraits" },
 ];
 
 const P = {
@@ -65,17 +65,17 @@ const P = {
 };
 
 const artworks = [
-  { title: "Cabriolet au soleil couchant", theme: "voitures", palette: P.sun, ratio: [3, 2], medium: "Acrylique", support: "Toile de lin", dimensions: "120 × 80 cm", price: 2400, status: "DISPONIBLE", isNew: true, description: "Une décapotable des années 60 saisie dans la lumière rasante de la fin d'été. Les aplats de couleurs vives évoquent la vitesse et la nostalgie des routes du Sud." },
-  { title: "Coccinelle turquoise", theme: "voitures", palette: P.pop, ratio: [1, 1], medium: "Huile", support: "Toile", dimensions: "80 × 80 cm", price: 1600, status: "RESERVE", isNew: true, description: "Hommage à une icône populaire, réinterprétée dans une palette pop et joyeuse." },
-  { title: "Grand Prix", theme: "voitures", palette: P.night, ratio: [2, 1], medium: "Acrylique et posca", support: "Bois", dimensions: "150 × 75 cm", price: 3200, status: "VENDU", isNew: false, description: "L'effervescence d'une ligne de départ, entre bruit des moteurs et éclats de couleur." },
-  { title: "Agrumes de Menton", theme: "fruits", palette: P.citrus, ratio: [4, 5], medium: "Gouache", support: "Papier 300 g", dimensions: "40 × 50 cm", price: 680, status: "DISPONIBLE", isNew: true, description: "Citrons et oranges éclatants, peints sur le vif lors de la fête du citron." },
-  { title: "Pastèque d'été", theme: "fruits", palette: P.pop, ratio: [1, 1], medium: "Acrylique", support: "Toile", dimensions: "60 × 60 cm", price: 890, status: "DISPONIBLE", isNew: false, description: "Une tranche de fraîcheur, généreuse et graphique." },
-  { title: "Corbeille de cerises", theme: "fruits", palette: P.sun, ratio: [3, 4], medium: "Huile", support: "Toile de lin", dimensions: "60 × 80 cm", price: 1200, status: "VENDU", isNew: false, description: "Nature morte contemporaine aux rouges profonds." },
-  { title: "Le flamant rose", theme: "animaux", palette: P.pop, ratio: [2, 3], medium: "Acrylique", support: "Toile", dimensions: "80 × 120 cm", price: 2100, status: "DISPONIBLE", isNew: true, description: "Élégance et déséquilibre : un flamant rose sur une patte, dans un décor tropical imaginaire." },
-  { title: "Toucan", theme: "animaux", palette: P.jungle, ratio: [4, 5], medium: "Encre et acrylique", support: "Papier marouflé sur toile", dimensions: "50 × 65 cm", price: 950, status: "RESERVE", isNew: false, description: "Le bec du toucan comme un éclat de soleil au cœur de la jungle." },
-  { title: "Le lion bleu", theme: "animaux", palette: P.night, ratio: [1, 1], medium: "Huile", support: "Toile", dimensions: "100 × 100 cm", price: null, status: "DISPONIBLE", isNew: false, description: "Un portrait de fauve tout en puissance, où le bleu remplace l'or attendu." },
-  { title: "Regard d'Afrique", theme: "portraits", palette: P.sun, ratio: [3, 4], medium: "Huile", support: "Toile", dimensions: "75 × 100 cm", price: 2800, status: "DISPONIBLE", isNew: false, description: "Portrait intense aux couleurs chaudes, entre force et douceur." },
-  { title: "Jeune fille au foulard", theme: "portraits", palette: P.citrus, ratio: [4, 5], medium: "Pastel à l'huile", support: "Papier", dimensions: "40 × 50 cm", price: 540, status: "VENDU", isNew: false, description: "Un clin d'œil aux maîtres flamands, revisité en couleurs acidulées." },
+  { title: "Cabriolet au soleil couchant", theme: "voitures", palette: P.sun, ratio: [3, 2], medium: "Acrylique", support: "Toile de lin", dimensions: "120 × 80 cm", price: 2400, status: "DISPONIBLE", isNew: true, description: "Une décapotable des années 60 saisie dans la lumière rasante de la fin d'été. Les aplats de couleurs vives évoquent la vitesse et la nostalgie des routes du Sud.", en: { title: "Convertible at Sunset", medium: "Acrylic", support: "Linen canvas", description: "A 1960s convertible caught in the low light of late summer. Flat areas of vivid colour evoke speed and nostalgia for the roads of the South of France." } },
+  { title: "Coccinelle turquoise", theme: "voitures", palette: P.pop, ratio: [1, 1], medium: "Huile", support: "Toile", dimensions: "80 × 80 cm", price: 1600, status: "RESERVE", isNew: true, description: "Hommage à une icône populaire, réinterprétée dans une palette pop et joyeuse.", en: { title: "Turquoise Beetle", medium: "Oil", support: "Canvas", description: "A tribute to a popular icon, reinterpreted in a joyful pop palette." } },
+  { title: "Grand Prix", theme: "voitures", palette: P.night, ratio: [2, 1], medium: "Acrylique et posca", support: "Bois", dimensions: "150 × 75 cm", price: 3200, status: "VENDU", isNew: false, description: "L'effervescence d'une ligne de départ, entre bruit des moteurs et éclats de couleur.", en: { title: "Grand Prix", medium: "Acrylic and Posca", support: "Wood", description: "The buzz of a starting grid, between roaring engines and bursts of colour." } },
+  { title: "Agrumes de Menton", theme: "fruits", palette: P.citrus, ratio: [4, 5], medium: "Gouache", support: "Papier 300 g", dimensions: "40 × 50 cm", price: 680, status: "DISPONIBLE", isNew: true, description: "Citrons et oranges éclatants, peints sur le vif lors de la fête du citron.", en: { title: "Menton Citrus", medium: "Gouache", support: "300 gsm paper", description: "Bright lemons and oranges, painted from life during the Menton Lemon Festival." } },
+  { title: "Pastèque d'été", theme: "fruits", palette: P.pop, ratio: [1, 1], medium: "Acrylique", support: "Toile", dimensions: "60 × 60 cm", price: 890, status: "DISPONIBLE", isNew: false, description: "Une tranche de fraîcheur, généreuse et graphique.", en: { title: "Summer Watermelon", medium: "Acrylic", support: "Canvas", description: "A slice of freshness, generous and graphic." } },
+  { title: "Corbeille de cerises", theme: "fruits", palette: P.sun, ratio: [3, 4], medium: "Huile", support: "Toile de lin", dimensions: "60 × 80 cm", price: 1200, status: "VENDU", isNew: false, description: "Nature morte contemporaine aux rouges profonds.", en: { title: "Basket of Cherries", medium: "Oil", support: "Linen canvas", description: "A contemporary still life in deep reds." } },
+  { title: "Le flamant rose", theme: "animaux", palette: P.pop, ratio: [2, 3], medium: "Acrylique", support: "Toile", dimensions: "80 × 120 cm", price: 2100, status: "DISPONIBLE", isNew: true, description: "Élégance et déséquilibre : un flamant rose sur une patte, dans un décor tropical imaginaire.", en: { title: "The Flamingo", medium: "Acrylic", support: "Canvas", description: "Elegance and imbalance: a flamingo on one leg, in an imaginary tropical setting." } },
+  { title: "Toucan", theme: "animaux", palette: P.jungle, ratio: [4, 5], medium: "Encre et acrylique", support: "Papier marouflé sur toile", dimensions: "50 × 65 cm", price: 950, status: "RESERVE", isNew: false, description: "Le bec du toucan comme un éclat de soleil au cœur de la jungle.", en: { title: "Toucan", medium: "Ink and acrylic", support: "Paper mounted on canvas", description: "The toucan's beak like a burst of sunlight in the heart of the jungle." } },
+  { title: "Le lion bleu", theme: "animaux", palette: P.night, ratio: [1, 1], medium: "Huile", support: "Toile", dimensions: "100 × 100 cm", price: null, status: "DISPONIBLE", isNew: false, description: "Un portrait de fauve tout en puissance, où le bleu remplace l'or attendu.", en: { title: "The Blue Lion", medium: "Oil", support: "Canvas", description: "A portrait of a big cat full of power, where blue replaces the expected gold." } },
+  { title: "Regard d'Afrique", theme: "portraits", palette: P.sun, ratio: [3, 4], medium: "Huile", support: "Toile", dimensions: "75 × 100 cm", price: 2800, status: "DISPONIBLE", isNew: false, description: "Portrait intense aux couleurs chaudes, entre force et douceur.", en: { title: "African Gaze", medium: "Oil", support: "Canvas", description: "An intense portrait in warm colours, between strength and gentleness." } },
+  { title: "Jeune fille au foulard", theme: "portraits", palette: P.citrus, ratio: [4, 5], medium: "Pastel à l'huile", support: "Papier", dimensions: "40 × 50 cm", price: 540, status: "VENDU", isNew: false, description: "Un clin d'œil aux maîtres flamands, revisité en couleurs acidulées.", en: { title: "Girl with a Headscarf", medium: "Oil pastel", support: "Paper", description: "A nod to the Flemish masters, revisited in tangy colours." } },
 ] as const;
 
 async function main() {
@@ -106,6 +106,10 @@ async function main() {
         description: a.description,
         medium: a.medium,
         support: a.support,
+        titleEn: a.en.title,
+        descriptionEn: a.en.description,
+        mediumEn: a.en.medium,
+        supportEn: a.en.support,
         dimensions: a.dimensions,
         price: a.price,
         status: a.status,

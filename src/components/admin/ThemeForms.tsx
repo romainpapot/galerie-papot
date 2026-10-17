@@ -17,12 +17,16 @@ export function NewThemeForm() {
         <input id="new-theme" name="name" className="field" placeholder="Nouveau thème (ex. : Paysages)" required />
         {state.error && <p className="mt-1.5 text-sm text-red-700">{state.error}</p>}
       </div>
+      <div className="flex-1">
+        <label htmlFor="new-theme-en" className="sr-only">Nom en anglais (facultatif)</label>
+        <input id="new-theme-en" name="nameEn" lang="en" className="field" placeholder="En anglais, facultatif (ex. : Landscapes)" />
+      </div>
       <button className="btn btn-primary" disabled={pending}>Ajouter</button>
     </form>
   );
 }
 
-export function ThemeRow({ theme }: { theme: { id: number; name: string; slug: string; count: number } }) {
+export function ThemeRow({ theme }: { theme: { id: number; name: string; nameEn: string; slug: string; count: number } }) {
   const [updState, update, updating] = useActionState(updateTheme, {} as FormState);
   const [delState, remove, deleting] = useActionState(deleteTheme, {} as FormState);
   const error = updState.error ?? delState.error;
@@ -41,6 +45,10 @@ export function ThemeRow({ theme }: { theme: { id: number; name: string; slug: s
           <label className="flex-1">
             <span className="sr-only">Nom</span>
             <input name="name" defaultValue={theme.name} className="field" required />
+          </label>
+          <label className="flex-1">
+            <span className="sr-only">Nom en anglais</span>
+            <input name="nameEn" lang="en" defaultValue={theme.nameEn} className="field" placeholder="En anglais" />
           </label>
           <label className="flex items-center gap-1 text-sm text-muted sm:w-56">
             <span className="shrink-0">/oeuvres?theme=</span>

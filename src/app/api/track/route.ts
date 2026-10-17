@@ -18,7 +18,8 @@ const payload = z.discriminatedUnion("type", [
   }),
 ]);
 
-const ARTWORK_PATH = /^\/oeuvres\/([^/]+)\/?$/;
+// Fiche œuvre, en français (/oeuvres/…) ou en anglais (/en/oeuvres/…)
+const ARTWORK_PATH = /^(?:\/en)?\/oeuvres\/([^/]+)\/?$/;
 
 /** Réception des mesures d'audience envoyées par le composant Tracker. */
 export async function POST(request: Request) {

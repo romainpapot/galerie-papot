@@ -34,4 +34,11 @@ l'installation et l'organisation du code.
 - Statistiques : collecte sans cookie (`src/components/Tracker.tsx` → `src/app/api/track/route.ts`,
   helpers dans `src/lib/analytics.ts`), agrégation en mémoire dans `src/lib/stats.ts`.
 - Après une modification du catalogue, appeler `revalidatePath("/", "layout")`.
+- Site public bilingue : pages dans `src/app/[lang]/` (`fr` sans préfixe d'URL, `en` sous
+  `/en`, aiguillage dans `src/proxy.ts`). Textes fixes dans `src/lib/dictionaries.ts`
+  (FR et EN, même forme) ; côté serveur `getTranslations()` (`src/lib/locale.ts`), côté
+  client passer `lang` en prop. Liens internes via `localePath(lang, "/…")` (`src/lib/i18n.ts`).
+- Contenus traduits en base : champs `…En` (œuvre) et `nameEn` (thème), facultatifs, lus
+  via `localizeArtwork` / `themeName` / `toCard(a, lang)` avec repli sur le français.
+- Le back-office (`src/app/admin/`, layout racine propre) reste en français uniquement.
 - Textes de l'interface en français, avec typographie française (« », espaces).

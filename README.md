@@ -1,8 +1,9 @@
 # Galerie Papot
 
-Site vitrine et galerie d'art en ligne : catalogue filtrable par thème, fiches
-œuvres avec statut (Disponible / Réservé / Vendu), formulaire de contact relié à
-l'œuvre avec notification email, et back-office pour le galeriste.
+Site vitrine et galerie d'art en ligne, en français et en anglais : catalogue
+filtrable par thème, fiches œuvres avec statut (Disponible / Réservé / Vendu),
+formulaire de contact relié à l'œuvre avec notification email, et back-office
+pour le galeriste.
 
 **Stack** : Next.js 16 (App Router) · Tailwind CSS 4 · Prisma 6 + SQLite ·
 images stockées localement (redimensionnées en WebP par `sharp`).
@@ -47,13 +48,31 @@ npm start
 ```
 prisma/schema.prisma      Modèle de données (Artwork, ArtworkImage, Theme, Inquiry, PageView, AdminUser)
 prisma/seed.ts            Données de démonstration (visuels abstraits générés)
-src/app/(site)/           Front-office : accueil, /oeuvres, /oeuvres/[slug], /contact
+src/app/[lang]/           Front-office (FR et EN) : accueil, /oeuvres, /oeuvres/[slug], /contact
+src/proxy.ts              Choix de la langue : /… en français, /en/… en anglais
 src/app/admin/            Back-office : connexion, tableau de bord, statistiques, œuvres, thèmes, demandes
 src/app/admin/actions.ts  Actions serveur du back-office (toutes protégées par requireAdmin)
 src/app/uploads/          Service des images envoyées
 src/components/           ArtworkCard, StatusBadge, ArtworkAction (bouton selon statut)…
-src/lib/                  Prisma, session (JWT en cookie httpOnly), images, email, statuts
+src/lib/                  Prisma, session (JWT en cookie httpOnly), images, email, statuts,
+                          langues (i18n.ts) et textes de l'interface (dictionaries.ts)
 ```
+
+## Français / English
+
+Le site public existe en deux langues : le français aux adresses habituelles
+(`/oeuvres/…`), l'anglais sous `/en` (`/en/oeuvres/…`). Un sélecteur FR / EN est
+dans l'en-tête et le choix est mémorisé (cookie `lang`). À la première visite, un
+navigateur réglé dans une autre langue que le français est dirigé vers l'anglais.
+Chaque page indique à Google sa version dans l'autre langue (balises `hreflang`).
+
+- Textes fixes (menus, boutons, statuts, formulaire) : `src/lib/dictionaries.ts`.
+- Contenus du catalogue : dans le back-office, chaque œuvre a une section
+  « Version anglaise » (titre, note d'intention, technique, support) et chaque thème
+  un nom anglais. Tout est facultatif : un champ vide affiche le texte français.
+- Les demandes envoyées depuis le site anglais portent la mention `EN` dans le
+  back-office et `[EN]` dans l'objet de l'email.
+- Le back-office reste en français.
 
 ## Statistiques de visite
 
@@ -68,8 +87,9 @@ stockée). Les robots, les navigateurs « Do Not Track / GPC » et l'administrat
 connecté ne sont pas comptés ; les données sont purgées après 13 mois. Pour suivre
 une campagne, ajoutez `?utm_source=newsletter` (par exemple) aux liens partagés.
 
-Après une mise à jour du code : `npx prisma db push` pour créer la table
-`page_views`, puis redémarrer le serveur.
+Après une mise à jour du code : `npx prisma db push` pour mettre la base à jour
+(table `page_views`, champs anglais), puis redémarrer le serveur. Les pages vues en
+anglais apparaissent avec la mention « (EN) ».
 
 ## Règles d'affichage des statuts
 

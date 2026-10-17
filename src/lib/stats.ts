@@ -1,5 +1,6 @@
 import "server-only";
 import { RETENTION_DAYS } from "@/lib/analytics";
+import { localeOfPath, stripLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { toStatus } from "@/lib/status";
 
@@ -162,8 +163,11 @@ export async function getStats(days: number) {
 
   // Pages
   const titleOf = new Map(artworks.map((a) => [`/oeuvres/${a.slug}`, a.title]));
-  const pageLabel = (path: string) =>
-    ({ "/": "Accueil", "/oeuvres": "Catalogue", "/contact": "Contact" })[path] ?? titleOf.get(path) ?? path;
+  const pageLabel = (path: string) => {
+    const base = stripLocale(path);
+    const label = ({ "/": "Accueil", "/oeuvres": "Catalogue", "/contact": "Contact" })[base] ?? titleOf.get(base) ?? base;
+    return localeOfPath(path) === "en" ? `${label} (EN)` : label;
+  };
   const pageCounts = new Map<string, number>();
   for (const v of views) pageCounts.set(v.path, (pageCounts.get(v.path) ?? 0) + 1);
   const pages = [...pageCounts]

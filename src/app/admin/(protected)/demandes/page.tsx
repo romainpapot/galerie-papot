@@ -27,6 +27,11 @@ export default async function AdminInquiries() {
                 <p className="font-medium">
                   {!q.isRead && <span className="mr-2 inline-block size-2 rounded-full bg-ink align-middle" aria-label="Non lue" />}
                   {q.visitorName}
+                  {q.locale === "en" && (
+                    <span className="ml-2 rounded-full bg-line px-2 py-0.5 align-middle text-[11px] font-medium tracking-wider" title="Envoyée depuis le site en anglais">
+                      EN
+                    </span>
+                  )}
                 </p>
                 <p className="text-sm text-muted">
                   <a href={`mailto:${q.visitorEmail}`} className="underline underline-offset-2 hover:text-ink">{q.visitorEmail}</a>

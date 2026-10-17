@@ -11,6 +11,10 @@ export type ArtworkFormValues = {
   description: string;
   medium: string;
   support: string;
+  titleEn: string;
+  descriptionEn: string;
+  mediumEn: string;
+  supportEn: string;
   dimensions: string;
   price: number | null;
   themeId: number | null;
@@ -85,6 +89,24 @@ export function ArtworkForm({ action, themes, initial }: Props) {
             </p>
           )}
         </div>
+
+        <fieldset className="space-y-6 rounded-lg border border-line p-4 sm:p-5">
+          <legend className="px-2 text-sm font-medium">
+            Version anglaise <span className="font-normal text-muted">· facultatif</span>
+          </legend>
+          <p className="-mt-2 text-xs text-muted">
+            Affichée sur le site en anglais (/en). Un champ laissé vide y est remplacé par sa version française.
+          </p>
+          <Text name="titleEn" label="Titre (anglais)" lang="en" defaultValue={initial?.titleEn} />
+          <div>
+            <label htmlFor="descriptionEn" className="label">Description / note d&apos;intention (anglais)</label>
+            <textarea id="descriptionEn" name="descriptionEn" lang="en" rows={6} className="field" defaultValue={initial?.descriptionEn} />
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Text name="mediumEn" label="Type de peinture (anglais)" lang="en" placeholder="Acrylic, oil…" defaultValue={initial?.mediumEn} />
+            <Text name="supportEn" label="Support (anglais)" lang="en" placeholder="Linen canvas, paper…" defaultValue={initial?.supportEn} />
+          </div>
+        </fieldset>
 
         <div>
           <p className="label">Images supplémentaires</p>

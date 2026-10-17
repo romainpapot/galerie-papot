@@ -10,24 +10,29 @@ datasource db {
 // SQLite ne gère pas les enums Prisma : le statut est stocké en String
 // et validé côté application (voir src/lib/status.ts).
 model Artwork {
-  id          Int            @id @default(autoincrement())
-  slug        String         @unique
-  title       String
-  description String         @default("")
-  medium      String         @default("")
-  support     String         @default("")
-  dimensions  String         @default("")
-  price       Float?
-  themeId     Int?           @map("theme_id")
-  theme       Theme?         @relation(fields: [themeId], references: [id], onDelete: Restrict)
-  imageUrl    String         @default("") @map("image_url")
-  images      ArtworkImage[]
-  isNew       Boolean        @default(false) @map("is_new")
-  status      String         @default("DISPONIBLE")
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
-  inquiries   Inquiry[]
-  pageViews   PageView[]
+  id            Int            @id @default(autoincrement())
+  slug          String         @unique
+  title         String
+  description   String         @default("")
+  medium        String         @default("")
+  support       String         @default("")
+  // Version anglaise (facultative : à défaut, le texte français est affiché)
+  titleEn       String         @default("") @map("title_en")
+  descriptionEn String         @default("") @map("description_en")
+  mediumEn      String         @default("") @map("medium_en")
+  supportEn     String         @default("") @map("support_en")
+  dimensions    String         @default("")
+  price         Float?
+  themeId       Int?           @map("theme_id")
+  theme         Theme?         @relation(fields: [themeId], references: [id], onDelete: Restrict)
+  imageUrl      String         @default("") @map("image_url")
+  images        ArtworkImage[]
+  isNew         Boolean        @default(false) @map("is_new")
+  status        String         @default("DISPONIBLE")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  inquiries     Inquiry[]
+  pageViews     PageView[]
 
   @@index([status])
   @@index([themeId])
@@ -48,6 +53,7 @@ model ArtworkImage {
 model Theme {
   id       Int       @id @default(autoincrement())
   name     String
+  nameEn   String    @default("") @map("name_en")
   slug     String    @unique
   artworks Artwork[]
 
@@ -62,6 +68,7 @@ model Inquiry {
   visitorEmail String   @map("visitor_email")
   visitorPhone String   @default("") @map("visitor_phone")
   message      String
+  locale       String   @default("fr") // langue du site lors de l'envoi
   isRead       Boolean  @default(false) @map("is_read")
   createdAt    DateTime @default(now()) @map("created_at")
 

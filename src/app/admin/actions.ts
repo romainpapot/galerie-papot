@@ -22,6 +22,10 @@ const artworkSchema = z.object({
   description: z.string().trim().max(10000),
   medium: z.string().trim().max(200),
   support: z.string().trim().max(200),
+  titleEn: z.string().trim().max(200),
+  descriptionEn: z.string().trim().max(10000),
+  mediumEn: z.string().trim().max(200),
+  supportEn: z.string().trim().max(200),
   dimensions: z.string().trim().max(200),
   price: z
     .string()
@@ -44,6 +48,10 @@ function parseArtwork(formData: FormData) {
     description: get("description"),
     medium: get("medium"),
     support: get("support"),
+    titleEn: get("titleEn"),
+    descriptionEn: get("descriptionEn"),
+    mediumEn: get("mediumEn"),
+    supportEn: get("supportEn"),
     dimensions: get("dimensions"),
     price: get("price"),
     themeId: get("themeId"),
@@ -166,16 +174,19 @@ export async function quickUpdateArtwork(formData: FormData) {
 /* ───────────── Thèmes ───────────── */
 
 const themeName = z.string().trim().min(1, "Nom obligatoire.").max(80);
+const themeNameEn = z.string().trim().max(80).catch("");
 
 export async function createTheme(_prev: FormState, formData: FormData): Promise<FormState> {
   await requireAdmin();
   const name = themeName.safeParse(formData.get("name"));
   if (!name.success) return { error: name.error.issues[0].message };
 
+  const nameEn = themeNameEn.parse(formData.get("nameEn") ?? "");
+
   const slug = await uniqueSlug(name.data, async (s) =>
     Boolean(await prisma.theme.findUnique({ where: { slug: s } })),
   );
-  await prisma.theme.create({ data: { name: name.data, slug } });
+  await prisma.theme.create({ data: { name: name.data, nameEn, slug } });
   refreshSite();
   return {};
 }
@@ -185,12 +196,13 @@ export async function updateTheme(_prev: FormState, formData: FormData): Promise
   const id = Number(formData.get("id"));
   const name = themeName.safeParse(formData.get("name"));
   if (!name.success) return { error: name.error.issues[0].message };
+  const nameEn = themeNameEn.parse(formData.get("nameEn") ?? "");
 
   const wanted = slugify(String(formData.get("slug") ?? "")) || slugify(name.data);
   const clash = await prisma.theme.findFirst({ where: { slug: wanted, id: { not: id } } });
   if (clash) return { error: `L'adresse « ${wanted} » est déjà utilisée par le thème ${clash.name}.` };
 
-  await prisma.theme.update({ where: { id }, data: { name: name.data, slug: wanted } });
+  await prisma.theme.update({ where: { id }, data: { name: name.data, nameEn, slug: wanted } });
   refreshSite();
   return {};
 }

@@ -16,7 +16,10 @@ export default async function AdminThemes() {
       {themes.length ? (
         <ul className="divide-y divide-line rounded-lg border border-line bg-white">
           {themes.map((t) => (
-            <ThemeRow key={`${t.id}-${t.name}-${t.slug}`} theme={{ id: t.id, name: t.name, slug: t.slug, count: t._count.artworks }} />
+            <ThemeRow
+              key={`${t.id}-${t.name}-${t.nameEn}-${t.slug}`}
+              theme={{ id: t.id, name: t.name, nameEn: t.nameEn, slug: t.slug, count: t._count.artworks }}
+            />
           ))}
         </ul>
       ) : (
