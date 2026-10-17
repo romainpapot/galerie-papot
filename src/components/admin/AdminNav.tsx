@@ -7,6 +7,7 @@ export function AdminNav({ unread }: { unread: number }) {
   const pathname = usePathname();
   const links = [
     { href: "/admin", label: "Tableau de bord", exact: true },
+    { href: "/admin/statistiques", label: "Statistiques" },
     { href: "/admin/oeuvres", label: "Œuvres" },
     { href: "/admin/themes", label: "Thèmes" },
     { href: "/admin/demandes", label: "Demandes", badge: unread },

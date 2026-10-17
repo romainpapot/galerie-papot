@@ -31,5 +31,7 @@ l'installation et l'organisation du code.
   `await requireAdmin()` ; les pages admin protégées sont sous `src/app/admin/(protected)/`.
 - Formulaires admin : soumis via `onSubmit` + `startTransition` pour éviter que
   React 19 vide le formulaire en cas d'erreur de validation.
+- Statistiques : collecte sans cookie (`src/components/Tracker.tsx` → `src/app/api/track/route.ts`,
+  helpers dans `src/lib/analytics.ts`), agrégation en mémoire dans `src/lib/stats.ts`.
 - Après une modification du catalogue, appeler `revalidatePath("/", "layout")`.
 - Textes de l'interface en français, avec typographie française (« », espaces).

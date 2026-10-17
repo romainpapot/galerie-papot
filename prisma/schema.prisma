@@ -27,6 +27,7 @@ model Artwork {
   createdAt   DateTime       @default(now()) @map("created_at")
   updatedAt   DateTime       @updatedAt @map("updated_at")
   inquiries   Inquiry[]
+  pageViews   PageView[]
 
   @@index([status])
   @@index([themeId])
@@ -65,6 +66,24 @@ model Inquiry {
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("inquiries")
+}
+
+// Mesure d'audience interne, sans cookie : le visiteur est une empreinte anonyme
+// (IP + navigateur hachés avec un sel renouvelé chaque jour), voir src/lib/analytics.ts.
+model PageView {
+  id        String   @id // identifiant généré par le navigateur, sert à enregistrer la durée
+  path      String
+  artworkId Int?     @map("artwork_id")
+  artwork   Artwork? @relation(fields: [artworkId], references: [id], onDelete: SetNull)
+  visitorId String   @map("visitor_id")
+  source    String   @default("Accès direct")
+  device    String   @default("Ordinateur")
+  duration  Int? // secondes passées sur la page (onglet visible)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([artworkId])
+  @@map("page_views")
 }
 
 model AdminUser {
