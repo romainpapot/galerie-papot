@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
+
+  /* Fonds neutres pour laisser parler les couleurs des œuvres */
+  --color-paper: #fbfaf8;
+  --color-ink: #1c1b19;
+  --color-muted: #6f6b64;
+  --color-line: #e7e3dc;
+  --color-accent: #1c1b19;
+
+  --color-available: #2f7a4f;
+  --color-reserved: #b7791f;
+  --color-sold: #8a8580;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper text-ink font-sans;
+  }
+  ::selection {
+    @apply bg-ink text-paper;
+  }
+}
+
+@utility container-page {
+  @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-not-allowed;
+}
+
+@utility btn-primary {
+  @apply bg-ink text-paper hover:bg-ink/85 disabled:bg-line disabled:text-muted;
+}
+
+@utility btn-outline {
+  @apply border border-ink/20 text-ink hover:border-ink;
+}
+
+@utility field {
+  @apply w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink placeholder:text-muted/60 focus:border-ink focus:outline-none sm:text-sm;
+}
+
+@utility label {
+  @apply mb-1.5 block text-xs font-medium tracking-wider text-muted uppercase;
+}

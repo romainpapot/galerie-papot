@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite ne gère pas les enums Prisma : le statut est stocké en String
+// et validé côté application (voir src/lib/status.ts).
+model Artwork {
+  id          Int            @id @default(autoincrement())
+  slug        String         @unique
+  title       String
+  description String         @default("")
+  medium      String         @default("")
+  support     String         @default("")
+  dimensions  String         @default("")
+  price       Float?
+  themeId     Int?           @map("theme_id")
+  theme       Theme?         @relation(fields: [themeId], references: [id], onDelete: Restrict)
+  imageUrl    String         @default("") @map("image_url")
+  images      ArtworkImage[]
+  isNew       Boolean        @default(false) @map("is_new")
+  status      String         @default("DISPONIBLE")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  inquiries   Inquiry[]
+
+  @@index([status])
+  @@index([themeId])
+  @@map("artworks")
+}
+
+// Images complémentaires (l'image principale est Artwork.imageUrl)
+model ArtworkImage {
+  id        Int     @id @default(autoincrement())
+  artworkId Int     @map("artwork_id")
+  artwork   Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  url       String
+  position  Int     @default(0)
+
+  @@map("artwork_images")
+}
+
+model Theme {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  artworks Artwork[]
+
+  @@map("themes")
+}
+
+model Inquiry {
+  id           Int      @id @default(autoincrement())
+  artworkId    Int?     @map("artwork_id")
+  artwork      Artwork? @relation(fields: [artworkId], references: [id], onDelete: SetNull)
+  visitorName  String   @map("visitor_name")
+  visitorEmail String   @map("visitor_email")
+  visitorPhone String   @default("") @map("visitor_phone")
+  message      String
+  isRead       Boolean  @default(false) @map("is_read")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("inquiries")
+}
+
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("admin_users")
+}
