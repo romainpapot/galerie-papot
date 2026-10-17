@@ -10,5 +10,6 @@ next-env.d.ts
 # Photos de travail des tableaux (seule la structure est versionnée)
 /photos-tableaux/**/*
 !/photos-tableaux/README.md
+!/photos-tableaux/reglages.json
 !/photos-tableaux/*/
 !/photos-tableaux/*/.gitkeep
