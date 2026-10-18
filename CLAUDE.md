@@ -22,6 +22,11 @@ l'installation et l'organisation du code.
 - Statut d'une œuvre stocké en texte (`DISPONIBLE`, `RESERVE`, `VENDU`), validé dans
   `src/lib/status.ts`. L'affichage conditionnel est dans `StatusBadge`,
   `ArtworkAction` (bouton de contact) et `ArtworkCard` (œuvre vendue grisée).
+- Type de peinture, support et dimensions : listes gérées en back-office (table
+  `list_options`, champ `kind` validé dans `src/lib/options.ts`), reliées à l'œuvre par
+  `mediumId` / `supportId` / `dimensionsId`. Artiste : table `artists` (`artistId`).
+  Les champs `legacy…` d'`Artwork` sont les anciens textes libres, repris par
+  `npm run db:migrer-listes` : ne plus les utiliser.
 - Références lisibles `GP-0001` calculées depuis l'id (`src/lib/format.ts`).
 - Images : converties en WebP par sharp (`src/lib/images.ts`), stockées dans
   `UPLOAD_DIR` et servies par `src/app/uploads/[...path]/route.ts` (pas `/public`,
@@ -38,7 +43,8 @@ l'installation et l'organisation du code.
   `/en`, aiguillage dans `src/proxy.ts`). Textes fixes dans `src/lib/dictionaries.ts`
   (FR et EN, même forme) ; côté serveur `getTranslations()` (`src/lib/locale.ts`), côté
   client passer `lang` en prop. Liens internes via `localePath(lang, "/…")` (`src/lib/i18n.ts`).
-- Contenus traduits en base : champs `…En` (œuvre) et `nameEn` (thème), facultatifs, lus
-  via `localizeArtwork` / `themeName` / `toCard(a, lang)` avec repli sur le français.
+- Contenus traduits en base : champs `…En` (œuvre) et `nameEn` (thème, valeur de liste),
+  facultatifs, lus via `localizeArtwork` / `themeName` / `optionName` / `toCard(a, lang)`
+  avec repli sur le français.
 - Le back-office (`src/app/admin/`, layout racine propre) reste en français uniquement.
 - Textes de l'interface en français, avec typographie française (« », espaces).

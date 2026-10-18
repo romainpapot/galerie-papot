@@ -7,6 +7,7 @@ import { deleteImage, filesFrom, saveImage } from "@/lib/images";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/session";
 import { slugify, uniqueSlug } from "@/lib/slug";
+import { OPTION_INFO, isOptionKind, normalizeDimensions } from "@/lib/options";
 import { STATUSES, isStatus } from "@/lib/status";
 
 export type FormState = { error?: string; fieldErrors?: Record<string, string> };
@@ -17,26 +18,28 @@ function refreshSite() {
 
 /* ───────────── Œuvres ───────────── */
 
+const optionalId = (message: string) =>
+  z
+    .string()
+    .transform((v) => (v ? Number(v) : null))
+    .refine((v) => v === null || Number.isInteger(v), message);
+
 const artworkSchema = z.object({
   title: z.string().trim().min(1, "Le titre est obligatoire.").max(200),
   description: z.string().trim().max(10000),
-  medium: z.string().trim().max(200),
-  support: z.string().trim().max(200),
   titleEn: z.string().trim().max(200),
   descriptionEn: z.string().trim().max(10000),
-  mediumEn: z.string().trim().max(200),
-  supportEn: z.string().trim().max(200),
-  dimensions: z.string().trim().max(200),
+  mediumId: optionalId("Type de peinture invalide."),
+  supportId: optionalId("Support invalide."),
+  dimensionsId: optionalId("Dimensions invalides."),
   price: z
     .string()
     .trim()
     .transform((v) => v.replace(/\s/g, "").replace(",", "."))
     .refine((v) => v === "" || (!Number.isNaN(Number(v)) && Number(v) >= 0), "Prix invalide.")
     .transform((v) => (v === "" ? null : Number(v))),
-  themeId: z
-    .string()
-    .transform((v) => (v ? Number(v) : null))
-    .refine((v) => v === null || Number.isInteger(v), "Thème invalide."),
+  themeId: optionalId("Thème invalide."),
+  artistId: optionalId("Artiste invalide."),
   status: z.enum(STATUSES, { error: "Statut invalide." }),
   isNew: z.boolean(),
 });
@@ -46,15 +49,14 @@ function parseArtwork(formData: FormData) {
   return artworkSchema.safeParse({
     title: get("title"),
     description: get("description"),
-    medium: get("medium"),
-    support: get("support"),
     titleEn: get("titleEn"),
     descriptionEn: get("descriptionEn"),
-    mediumEn: get("mediumEn"),
-    supportEn: get("supportEn"),
-    dimensions: get("dimensions"),
+    mediumId: get("mediumId"),
+    supportId: get("supportId"),
+    dimensionsId: get("dimensionsId"),
     price: get("price"),
     themeId: get("themeId"),
+    artistId: get("artistId"),
     status: get("status"),
     isNew: formData.get("isNew") === "on",
   });
@@ -215,6 +217,109 @@ export async function deleteTheme(_prev: FormState, formData: FormData): Promise
     return { error: `Ce thème contient ${count} œuvre${count > 1 ? "s" : ""}. Réaffectez-les avant de le supprimer.` };
   }
   await prisma.theme.delete({ where: { id } });
+  refreshSite();
+  return {};
+}
+
+/* ───────────── Artistes ───────────── */
+
+const artistName = z.string().trim().min(1, "Nom obligatoire.").max(120);
+
+export async function createArtist(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const name = artistName.safeParse(formData.get("name"));
+  if (!name.success) return { error: name.error.issues[0].message };
+
+  const slug = await uniqueSlug(name.data, async (s) =>
+    Boolean(await prisma.artist.findUnique({ where: { slug: s } })),
+  );
+  await prisma.artist.create({ data: { name: name.data, slug } });
+  refreshSite();
+  return {};
+}
+
+export async function updateArtist(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const name = artistName.safeParse(formData.get("name"));
+  if (!name.success) return { error: name.error.issues[0].message };
+
+  const wanted = slugify(String(formData.get("slug") ?? "")) || slugify(name.data);
+  const clash = await prisma.artist.findFirst({ where: { slug: wanted, id: { not: id } } });
+  if (clash) return { error: `L'adresse « ${wanted} » est déjà utilisée par ${clash.name}.` };
+
+  await prisma.artist.update({ where: { id }, data: { name: name.data, slug: wanted } });
+  refreshSite();
+  return {};
+}
+
+export async function deleteArtist(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const count = await prisma.artwork.count({ where: { artistId: id } });
+  if (count > 0) {
+    return { error: `Cet artiste a ${count} œuvre${count > 1 ? "s" : ""}. Réaffectez-les avant de le supprimer.` };
+  }
+  await prisma.artist.delete({ where: { id } });
+  refreshSite();
+  return {};
+}
+
+/* ───────────── Listes (type de peinture, support, dimensions) ───────────── */
+
+const optionName = z.string().trim().min(1, "Valeur obligatoire.").max(120);
+const optionNameEn = z.string().trim().max(120).catch("");
+
+async function parseOption(
+  formData: FormData,
+  id?: number,
+): Promise<{ error: string } | { kind: string; name: string; nameEn: string }> {
+  const kind = formData.get("kind");
+  if (!isOptionKind(kind)) return { error: "Liste inconnue." };
+  const parsed = optionName.safeParse(formData.get("name"));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const name = kind === "DIMENSIONS" ? normalizeDimensions(parsed.data) : parsed.data;
+  const nameEn = kind === "DIMENSIONS" ? "" : optionNameEn.parse(formData.get("nameEn") ?? "");
+
+  // Doublon à la casse près (« acrylique » / « Acrylique ») : refusé pour garder un nommage uniforme
+  const others = await prisma.listOption.findMany({ where: { kind, id: id ? { not: id } : undefined } });
+  const clash = others.find((o) => o.name.localeCompare(name, "fr", { sensitivity: "base" }) === 0);
+  if (clash) return { error: `« ${clash.name} » existe déjà dans la liste ${OPTION_INFO[kind].label}.` };
+
+  return { kind, name, nameEn };
+}
+
+export async function createOption(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const data = await parseOption(formData);
+  if ("error" in data) return data;
+  await prisma.listOption.create({ data });
+  refreshSite();
+  return {};
+}
+
+export async function updateOption(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const data = await parseOption(formData, id);
+  if ("error" in data) return data;
+  const current = await prisma.listOption.findUnique({ where: { id } });
+  if (current?.kind !== data.kind) return { error: "Valeur introuvable." };
+  await prisma.listOption.update({ where: { id }, data: { name: data.name, nameEn: data.nameEn } });
+  refreshSite();
+  return {};
+}
+
+export async function deleteOption(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const count = await prisma.artwork.count({
+    where: { OR: [{ mediumId: id }, { supportId: id }, { dimensionsId: id }] },
+  });
+  if (count > 0) {
+    return { error: `Valeur utilisée par ${count} œuvre${count > 1 ? "s" : ""}. Modifiez-les avant de la supprimer.` };
+  }
+  await prisma.listOption.delete({ where: { id } });
   refreshSite();
   return {};
 }

@@ -4,20 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useActionState, useState } from "react";
 import type { FormState } from "@/app/admin/actions";
+import { OPTION_INFO, type OptionKind } from "@/lib/options";
 import { STATUSES, STATUS_LABELS, type ArtworkStatus } from "@/lib/status";
 
 export type ArtworkFormValues = {
   title: string;
   description: string;
-  medium: string;
-  support: string;
   titleEn: string;
   descriptionEn: string;
-  mediumEn: string;
-  supportEn: string;
-  dimensions: string;
+  mediumId: number | null;
+  supportId: number | null;
+  dimensionsId: number | null;
   price: number | null;
   themeId: number | null;
+  artistId: number | null;
   status: ArtworkStatus;
   isNew: boolean;
   imageUrl: string;
@@ -27,6 +27,9 @@ export type ArtworkFormValues = {
 type Props = {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   themes: { id: number; name: string }[];
+  artists: { id: number; name: string }[];
+  /** Valeurs des listes déroulantes, déjà triées. */
+  options: Record<OptionKind, { id: number; name: string }[]>;
   initial?: ArtworkFormValues;
 };
 
@@ -36,7 +39,7 @@ const STATUS_HELP: Record<ArtworkStatus, string> = {
   VENDU: "Badge « Vendu », visuel légèrement grisé, conservée en archive.",
 };
 
-export function ArtworkForm({ action, themes, initial }: Props) {
+export function ArtworkForm({ action, themes, artists, options, initial }: Props) {
   const [state, formAction, pending] = useActionState(action, {});
   const [preview, setPreview] = useState<string | null>(null);
   const errors = state.fieldErrors ?? {};
@@ -57,14 +60,44 @@ export function ArtworkForm({ action, themes, initial }: Props) {
         <Text name="title" label="Titre" required defaultValue={initial?.title} error={errors.title} />
 
         <div>
+          <label htmlFor="artistId" className="label">Artiste</label>
+          <select id="artistId" name="artistId" className="field" defaultValue={initial?.artistId ?? ""}>
+            <option value="">— Non précisé —</option>
+            {artists.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+          {errors.artistId && <p className="mt-1.5 text-sm text-red-700">{errors.artistId}</p>}
+          <p className="mt-1.5 text-xs text-muted">
+            {artists.length === 0 && "Aucun artiste : "}
+            <Link href="/admin/artistes" target="_blank" className="underline">
+              {artists.length === 0 ? "créez-en un" : "Gérer les artistes"}
+            </Link>
+            {" "}(puis rechargez cette page).
+          </p>
+        </div>
+
+        <div>
           <label htmlFor="description" className="label">Description / note d&apos;intention</label>
           <textarea id="description" name="description" rows={6} className="field" defaultValue={initial?.description} />
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
-          <Text name="medium" label="Type de peinture" placeholder="Acrylique, huile…" defaultValue={initial?.medium} />
-          <Text name="support" label="Support" placeholder="Toile de lin, papier…" defaultValue={initial?.support} />
-          <Text name="dimensions" label="Dimensions" placeholder="80 × 100 cm" defaultValue={initial?.dimensions} />
+          {(["MEDIUM", "SUPPORT", "DIMENSIONS"] as const).map((kind) => {
+            const { field, label } = OPTION_INFO[kind];
+            return (
+              <div key={kind}>
+                <label htmlFor={field} className="label">{label}</label>
+                <select id={field} name={field} className="field" defaultValue={initial?.[field] ?? ""}>
+                  <option value="">— Non précisé —</option>
+                  {options[kind].map((o) => (
+                    <option key={o.id} value={o.id}>{o.name}</option>
+                  ))}
+                </select>
+                {errors[field] && <p className="mt-1.5 text-sm text-red-700">{errors[field]}</p>}
+              </div>
+            );
+          })}
           <Text
             name="price"
             label="Prix (€)"
@@ -74,6 +107,12 @@ export function ArtworkForm({ action, themes, initial }: Props) {
             error={errors.price}
           />
         </div>
+
+        <p className="-mt-3 text-xs text-muted">
+          Une valeur manque ?{" "}
+          <Link href="/admin/listes" target="_blank" className="underline">Ajoutez-la aux listes</Link>
+          {" "}(avec sa traduction anglaise), puis rechargez cette page.
+        </p>
 
         <div>
           <label htmlFor="themeId" className="label">Thème</label>
@@ -95,16 +134,12 @@ export function ArtworkForm({ action, themes, initial }: Props) {
             Version anglaise <span className="font-normal text-muted">· facultatif</span>
           </legend>
           <p className="-mt-2 text-xs text-muted">
-            Affichée sur le site en anglais (/en). Un champ laissé vide y est remplacé par sa version française.
+            Affichée sur le site en anglais (/en). Un champ laissé vide y est remplacé par sa version française. Le type de peinture et le support se traduisent dans les Listes.
           </p>
           <Text name="titleEn" label="Titre (anglais)" lang="en" defaultValue={initial?.titleEn} />
           <div>
             <label htmlFor="descriptionEn" className="label">Description / note d&apos;intention (anglais)</label>
             <textarea id="descriptionEn" name="descriptionEn" lang="en" rows={6} className="field" defaultValue={initial?.descriptionEn} />
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Text name="mediumEn" label="Type de peinture (anglais)" lang="en" placeholder="Acrylic, oil…" defaultValue={initial?.mediumEn} />
-            <Text name="supportEn" label="Support (anglais)" lang="en" placeholder="Linen canvas, paper…" defaultValue={initial?.supportEn} />
           </div>
         </fieldset>
 

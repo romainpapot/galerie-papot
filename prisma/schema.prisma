@@ -10,32 +10,44 @@ datasource db {
 // SQLite ne gère pas les enums Prisma : le statut est stocké en String
 // et validé côté application (voir src/lib/status.ts).
 model Artwork {
-  id            Int            @id @default(autoincrement())
-  slug          String         @unique
-  title         String
-  description   String         @default("")
-  medium        String         @default("")
-  support       String         @default("")
+  id               Int            @id @default(autoincrement())
+  slug             String         @unique
+  title            String
+  description      String         @default("")
   // Version anglaise (facultative : à défaut, le texte français est affiché)
-  titleEn       String         @default("") @map("title_en")
-  descriptionEn String         @default("") @map("description_en")
-  mediumEn      String         @default("") @map("medium_en")
-  supportEn     String         @default("") @map("support_en")
-  dimensions    String         @default("")
-  price         Float?
-  themeId       Int?           @map("theme_id")
-  theme         Theme?         @relation(fields: [themeId], references: [id], onDelete: Restrict)
-  imageUrl      String         @default("") @map("image_url")
-  images        ArtworkImage[]
-  isNew         Boolean        @default(false) @map("is_new")
-  status        String         @default("DISPONIBLE")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  inquiries     Inquiry[]
-  pageViews     PageView[]
+  titleEn          String         @default("") @map("title_en")
+  descriptionEn    String         @default("") @map("description_en")
+  // Valeurs choisies dans les listes gérées en back-office (voir ListOption)
+  mediumId         Int?           @map("medium_id")
+  medium           ListOption?    @relation("ArtworkMedium", fields: [mediumId], references: [id], onDelete: Restrict)
+  supportId        Int?           @map("support_id")
+  support          ListOption?    @relation("ArtworkSupport", fields: [supportId], references: [id], onDelete: Restrict)
+  dimensionsId     Int?           @map("dimensions_id")
+  dimensions       ListOption?    @relation("ArtworkDimensions", fields: [dimensionsId], references: [id], onDelete: Restrict)
+  // Anciens champs en texte libre, repris dans les listes par `npm run db:migrer-listes`.
+  // Plus utilisés par le site : à supprimer une fois la production migrée.
+  legacyMedium     String         @default("") @map("medium")
+  legacySupport    String         @default("") @map("support")
+  legacyMediumEn   String         @default("") @map("medium_en")
+  legacySupportEn  String         @default("") @map("support_en")
+  legacyDimensions String         @default("") @map("dimensions")
+  price            Float?
+  themeId          Int?           @map("theme_id")
+  theme            Theme?         @relation(fields: [themeId], references: [id], onDelete: Restrict)
+  artistId         Int?           @map("artist_id")
+  artist           Artist?        @relation(fields: [artistId], references: [id], onDelete: Restrict)
+  imageUrl         String         @default("") @map("image_url")
+  images           ArtworkImage[]
+  isNew            Boolean        @default(false) @map("is_new")
+  status           String         @default("DISPONIBLE")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  inquiries        Inquiry[]
+  pageViews        PageView[]
 
   @@index([status])
   @@index([themeId])
+  @@index([artistId])
   @@map("artworks")
 }
 
@@ -58,6 +70,30 @@ model Theme {
   artworks Artwork[]
 
   @@map("themes")
+}
+
+model Artist {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  artworks Artwork[]
+
+  @@map("artists")
+}
+
+// Valeurs des listes déroulantes du formulaire d'œuvre, pour un nommage identique
+// d'une œuvre à l'autre. `kind` : MEDIUM, SUPPORT ou DIMENSIONS (src/lib/options.ts).
+model ListOption {
+  id           Int       @id @default(autoincrement())
+  kind         String
+  name         String
+  nameEn       String    @default("") @map("name_en")
+  mediumOf     Artwork[] @relation("ArtworkMedium")
+  supportOf    Artwork[] @relation("ArtworkSupport")
+  dimensionsOf Artwork[] @relation("ArtworkDimensions")
+
+  @@unique([kind, name])
+  @@map("list_options")
 }
 
 model Inquiry {

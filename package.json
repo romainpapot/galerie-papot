@@ -13,6 +13,7 @@
     "db:studio": "prisma studio",
     "setup": "prisma db push && prisma db seed",
     "postinstall": "prisma generate",
+    "db:migrer-listes": "tsx scripts/migrer-listes.ts",
     "photos:encadrer": "tsx scripts/encadrer-tableaux.ts"
   },
   "prisma": {

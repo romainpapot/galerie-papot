@@ -6,7 +6,7 @@ import { ArtworkAction } from "@/components/ArtworkAction";
 import { ArtworkCard } from "@/components/ArtworkCard";
 import { ArtworkGallery } from "@/components/ArtworkGallery";
 import { StatusBadge } from "@/components/StatusBadge";
-import { allImages, localizeArtwork, themeName, toCard } from "@/lib/artworks";
+import { allImages, artworkDetails, localizeArtwork, themeName, toCard } from "@/lib/artworks";
 import { artworkReference, formatPrice } from "@/lib/format";
 import { alternates, localePath } from "@/lib/i18n";
 import { getLocale, getTranslations } from "@/lib/locale";
@@ -16,7 +16,7 @@ import { toStatus } from "@/lib/status";
 export const dynamic = "force-dynamic";
 
 const getArtwork = cache((slug: string) =>
-  prisma.artwork.findUnique({ where: { slug }, include: { theme: true, images: true } }),
+  prisma.artwork.findUnique({ where: { slug }, include: { ...artworkDetails, images: true } }),
 );
 
 export async function generateMetadata(props: PageProps<"/[lang]/oeuvres/[slug]">): Promise<Metadata> {
@@ -53,7 +53,7 @@ export default async function ArtworkPage(props: PageProps<"/[lang]/oeuvres/[slu
   const specs = [
     [t.artwork.medium, text.medium],
     [t.artwork.support, text.support],
-    [t.artwork.dimensions, artwork.dimensions],
+    [t.artwork.dimensions, text.dimensions],
     [t.artwork.theme, theme?.name],
     [t.artwork.reference, artworkReference(artwork.id)],
   ].filter((s): s is [string, string] => Boolean(s[1]));
@@ -78,6 +78,18 @@ export default async function ArtworkPage(props: PageProps<"/[lang]/oeuvres/[slu
         <div className="lg:sticky lg:top-24 lg:self-start">
           <StatusBadge status={status} lang={lang} className="!bg-transparent !px-0 !ring-0" />
           <h1 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">{text.title}</h1>
+          {artwork.artist && (
+            <p className="mt-2 text-lg text-muted">
+              {t.artwork.by}{" "}
+              <Link
+                href={localePath(lang, `/oeuvres?artiste=${artwork.artist.slug}`)}
+                className="text-ink underline decoration-line underline-offset-4 hover:decoration-ink"
+                title={t.artwork.artistWorks(artwork.artist.name)}
+              >
+                {artwork.artist.name}
+              </Link>
+            </p>
+          )}
           <p className={`mt-3 text-2xl ${status === "VENDU" ? "text-muted line-through decoration-1" : ""}`}>
             {formatPrice(artwork.price, lang)}
           </p>

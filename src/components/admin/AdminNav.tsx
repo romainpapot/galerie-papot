@@ -9,7 +9,9 @@ export function AdminNav({ unread }: { unread: number }) {
     { href: "/admin", label: "Tableau de bord", exact: true },
     { href: "/admin/statistiques", label: "Statistiques" },
     { href: "/admin/oeuvres", label: "Œuvres" },
+    { href: "/admin/artistes", label: "Artistes" },
     { href: "/admin/themes", label: "Thèmes" },
+    { href: "/admin/listes", label: "Listes" },
     { href: "/admin/demandes", label: "Demandes", badge: unread },
   ];
 

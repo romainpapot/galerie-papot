@@ -5,6 +5,7 @@ import { artworkReference } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import { toStatus } from "@/lib/status";
 import { updateArtwork } from "../../../actions";
+import { artworkFormChoices } from "../choices";
 
 export const metadata = { title: "Modifier une œuvre" };
 
@@ -12,9 +13,9 @@ export default async function EditArtwork(props: PageProps<"/admin/oeuvres/[id]"
   const id = Number((await props.params).id);
   if (!Number.isInteger(id)) notFound();
 
-  const [artwork, themes] = await Promise.all([
+  const [artwork, choices] = await Promise.all([
     prisma.artwork.findUnique({ where: { id }, include: { images: { orderBy: { position: "asc" } } } }),
-    prisma.theme.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    artworkFormChoices(),
   ]);
   if (!artwork) notFound();
 
@@ -30,7 +31,7 @@ export default async function EditArtwork(props: PageProps<"/admin/oeuvres/[id]"
       </div>
       <ArtworkForm
         action={updateArtwork.bind(null, artwork.id)}
-        themes={themes}
+        {...choices}
         initial={{
           ...artwork,
           status: toStatus(artwork.status),

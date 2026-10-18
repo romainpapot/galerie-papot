@@ -21,9 +21,10 @@ const STATUS_ORDER = { DISPONIBLE: 0, RESERVE: 1, VENDU: 2 } as const;
 
 export default async function OeuvresPage() {
   const { lang, t } = await getTranslations();
-  const [artworks, themes] = await Promise.all([
-    prisma.artwork.findMany({ include: { theme: true }, orderBy: { createdAt: "desc" } }),
+  const [artworks, themes, artists] = await Promise.all([
+    prisma.artwork.findMany({ include: { theme: true, artist: true }, orderBy: { createdAt: "desc" } }),
     prisma.theme.findMany({ where: { artworks: { some: {} } } }),
+    prisma.artist.findMany({ where: { artworks: { some: {} } }, select: { name: true, slug: true } }),
   ]);
 
   // Les œuvres vendues restent visibles (archive) mais passent en fin de liste
@@ -33,6 +34,7 @@ export default async function OeuvresPage() {
   const filters = themes
     .map((th) => ({ name: themeName(th, lang), slug: th.slug }))
     .sort((a, b) => a.name.localeCompare(b.name, lang));
+  artists.sort((a, b) => a.name.localeCompare(b.name, lang));
 
   return (
     <div className="container-page pt-10 md:pt-16">
@@ -41,7 +43,7 @@ export default async function OeuvresPage() {
         <p className="mt-4 text-muted">{t.catalogue.intro}</p>
       </header>
       <Suspense>
-        <Catalogue artworks={cards} themes={filters} lang={lang} />
+        <Catalogue artworks={cards} themes={filters} artists={artists} lang={lang} />
       </Suspense>
     </div>
   );

@@ -1,7 +1,7 @@
 # Galerie Papot
 
 Site vitrine et galerie d'art en ligne, en français et en anglais : catalogue
-filtrable par thème, fiches œuvres avec statut (Disponible / Réservé / Vendu),
+filtrable par thème et par artiste, fiches œuvres avec statut (Disponible / Réservé / Vendu),
 formulaire de contact relié à l'œuvre avec notification email, et back-office
 pour le galeriste.
 
@@ -46,11 +46,12 @@ npm start
 ## Organisation
 
 ```
-prisma/schema.prisma      Modèle de données (Artwork, ArtworkImage, Theme, Inquiry, PageView, AdminUser)
+prisma/schema.prisma      Modèle de données (Artwork, ArtworkImage, Artist, Theme, ListOption, Inquiry, PageView, AdminUser)
 prisma/seed.ts            Données de démonstration (visuels abstraits générés)
 src/app/[lang]/           Front-office (FR et EN) : accueil, /oeuvres, /oeuvres/[slug], /contact
 src/proxy.ts              Choix de la langue : /… en français, /en/… en anglais
-src/app/admin/            Back-office : connexion, tableau de bord, statistiques, œuvres, thèmes, demandes
+src/app/admin/            Back-office : connexion, tableau de bord, statistiques, œuvres, artistes,
+                          thèmes, listes, demandes
 src/app/admin/actions.ts  Actions serveur du back-office (toutes protégées par requireAdmin)
 src/app/uploads/          Service des images envoyées
 src/components/           ArtworkCard, StatusBadge, ArtworkAction (bouton selon statut)…
@@ -68,11 +69,31 @@ Chaque page indique à Google sa version dans l'autre langue (balises `hreflang`
 
 - Textes fixes (menus, boutons, statuts, formulaire) : `src/lib/dictionaries.ts`.
 - Contenus du catalogue : dans le back-office, chaque œuvre a une section
-  « Version anglaise » (titre, note d'intention, technique, support) et chaque thème
-  un nom anglais. Tout est facultatif : un champ vide affiche le texte français.
+  « Version anglaise » (titre, note d'intention), chaque thème un nom anglais, et
+  chaque type de peinture et support un nom anglais dans « Listes ». Tout est facultatif : un champ vide affiche le texte français.
 - Les demandes envoyées depuis le site anglais portent la mention `EN` dans le
   back-office et `[EN]` dans l'objet de l'email.
 - Le back-office reste en français.
+
+## Artistes et listes
+
+La galerie expose plusieurs artistes : la page « Artistes » du back-office les
+gère (nom, adresse du filtre `/oeuvres?artiste=…`). Le nom figure sur la fiche de
+l'œuvre (« par … ») et le catalogue propose un filtre par artiste dès qu'un artiste
+a au moins une œuvre.
+
+Le type de peinture, le support et les dimensions se choisissent dans des listes
+déroulantes, pour un nommage identique d'une œuvre à l'autre. Les valeurs se gèrent
+dans « Listes » (avec leur traduction anglaise) ; renommer une valeur met à jour
+toutes les œuvres qui l'utilisent, et une valeur utilisée ne peut pas être supprimée.
+Les dimensions saisies sont mises en forme automatiquement (`80x100` → `80 × 100 cm`).
+
+Mise à jour d'une base existante (anciens champs en texte libre) :
+
+```bash
+npx prisma db push          # ajoute les tables artists et list_options
+npm run db:migrer-listes    # crée les valeurs à partir des œuvres et les relie (relançable)
+```
 
 ## Statistiques de visite
 

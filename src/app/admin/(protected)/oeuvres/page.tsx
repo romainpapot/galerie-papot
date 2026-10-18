@@ -20,7 +20,7 @@ export default async function AdminArtworks(props: PageProps<"/admin/oeuvres">) 
 
   const artworks = await prisma.artwork.findMany({
     where: status ? { status } : {},
-    include: { theme: true },
+    include: { theme: true, artist: true },
     orderBy: { createdAt: "desc" },
   });
 
@@ -60,7 +60,7 @@ export default async function AdminArtworks(props: PageProps<"/admin/oeuvres">) 
                     {a.title}
                   </Link>
                   <p className="text-sm text-muted">
-                    {artworkReference(a.id)} · {a.theme?.name ?? "Sans thème"} · {formatPrice(a.price)}
+                    {artworkReference(a.id)}{a.artist && ` · ${a.artist.name}`} · {a.theme?.name ?? "Sans thème"} · {formatPrice(a.price)}
                   </p>
                 </div>
               </div>

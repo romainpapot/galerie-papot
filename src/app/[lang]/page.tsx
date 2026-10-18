@@ -18,7 +18,7 @@ export default async function HomePage() {
   const [flagged, themes] = await Promise.all([
     prisma.artwork.findMany({
       where: { isNew: true },
-      include: { theme: true },
+      include: { theme: true, medium: true },
       orderBy: { createdAt: "desc" },
       take: 8,
     }),
@@ -34,7 +34,7 @@ export default async function HomePage() {
   // Sans œuvre marquée « Nouveauté », on montre les derniers ajouts
   const news = flagged.length
     ? flagged
-    : await prisma.artwork.findMany({ include: { theme: true }, orderBy: { createdAt: "desc" }, take: 4 });
+    : await prisma.artwork.findMany({ include: { theme: true, medium: true }, orderBy: { createdAt: "desc" }, take: 4 });
   // Thèmes classés selon leur nom dans la langue affichée
   themes.sort((a, b) => themeName(a, lang).localeCompare(themeName(b, lang), lang));
   const hero = news[0];

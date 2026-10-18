@@ -1,6 +1,7 @@
 /**
- * Données de démonstration : thèmes, œuvres (avec visuels générés) et compte
- * administrateur. Relancer `npm run db:seed` réinitialise le catalogue.
+ * Données de démonstration : thèmes, listes, œuvres (avec visuels générés) et
+ * compte administrateur. Relancer `npm run db:seed` réinitialise le catalogue
+ * (artistes compris).
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -83,9 +84,19 @@ async function main() {
   await prisma.artworkImage.deleteMany();
   await prisma.artwork.deleteMany();
   await prisma.theme.deleteMany();
+  await prisma.listOption.deleteMany();
+  await prisma.artist.deleteMany();
 
   const themeIds = new Map<string, number>();
   for (const t of themes) themeIds.set(t.slug, (await prisma.theme.create({ data: t })).id);
+
+  // Valeurs des listes (type de peinture, support, dimensions), créées une seule fois chacune
+  const optionIds = new Map<string, number>();
+  async function option(kind: string, name: string, nameEn = "") {
+    const key = `${kind}:${name}`;
+    if (!optionIds.has(key)) optionIds.set(key, (await prisma.listOption.create({ data: { kind, name, nameEn } })).id);
+    return optionIds.get(key)!;
+  }
 
   for (const [i, a] of artworks.entries()) {
     const [rw, rh] = a.ratio;
@@ -104,13 +115,11 @@ async function main() {
         slug,
         title: a.title,
         description: a.description,
-        medium: a.medium,
-        support: a.support,
         titleEn: a.en.title,
         descriptionEn: a.en.description,
-        mediumEn: a.en.medium,
-        supportEn: a.en.support,
-        dimensions: a.dimensions,
+        mediumId: await option("MEDIUM", a.medium, a.en.medium),
+        supportId: await option("SUPPORT", a.support, a.en.support),
+        dimensionsId: await option("DIMENSIONS", a.dimensions),
         price: a.price,
         status: a.status,
         isNew: a.isNew,
@@ -131,7 +140,7 @@ async function main() {
     create: { username, passwordHash: await bcrypt.hash(password, 12) },
   });
 
-  console.log(`✓ ${themes.length} thèmes, ${artworks.length} œuvres, compte admin « ${username} »`);
+  console.log(`✓ ${themes.length} thèmes, ${optionIds.size} valeurs de listes, ${artworks.length} œuvres, compte admin « ${username} »`);
 }
 
 main()
