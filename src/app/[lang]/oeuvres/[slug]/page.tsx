@@ -7,6 +7,7 @@ import { ArtworkCard } from "@/components/ArtworkCard";
 import { ArtworkGallery } from "@/components/ArtworkGallery";
 import { StatusBadge } from "@/components/StatusBadge";
 import { allImages, artworkDetails, localizeArtwork, themeName, toCard } from "@/lib/artworks";
+import { fill } from "@/lib/dictionaries";
 import { artworkReference, formatPrice } from "@/lib/format";
 import { alternates, localePath } from "@/lib/i18n";
 import { getLocale, getTranslations } from "@/lib/locale";
@@ -73,10 +74,10 @@ export default async function ArtworkPage(props: PageProps<"/[lang]/oeuvres/[slu
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
-        <ArtworkGallery images={allImages(artwork)} title={text.title} lang={lang} muted={status === "VENDU"} />
+        <ArtworkGallery images={allImages(artwork)} title={text.title} muted={status === "VENDU"} />
 
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <StatusBadge status={status} lang={lang} className="!bg-transparent !px-0 !ring-0" />
+          <StatusBadge status={status} className="!bg-transparent !px-0 !ring-0" />
           <h1 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">{text.title}</h1>
           {artwork.artist && (
             <p className="mt-2 text-lg text-muted">
@@ -84,14 +85,14 @@ export default async function ArtworkPage(props: PageProps<"/[lang]/oeuvres/[slu
               <Link
                 href={localePath(lang, `/oeuvres?artiste=${artwork.artist.slug}`)}
                 className="text-ink underline decoration-line underline-offset-4 hover:decoration-ink"
-                title={t.artwork.artistWorks(artwork.artist.name)}
+                title={fill(t.artwork.artistWorks, { name: artwork.artist.name })}
               >
                 {artwork.artist.name}
               </Link>
             </p>
           )}
           <p className={`mt-3 text-2xl ${status === "VENDU" ? "text-muted line-through decoration-1" : ""}`}>
-            {formatPrice(artwork.price, lang)}
+            {formatPrice(artwork.price, lang, t.priceOnRequest)}
           </p>
 
           <dl className="mt-8 divide-y divide-line border-y border-line text-sm">
@@ -104,7 +105,7 @@ export default async function ArtworkPage(props: PageProps<"/[lang]/oeuvres/[slu
           </dl>
 
           <div className="mt-8">
-            <ArtworkAction id={artwork.id} status={status} lang={lang} />
+            <ArtworkAction id={artwork.id} status={status} lang={lang} t={t.action} />
           </div>
 
           {text.description && (

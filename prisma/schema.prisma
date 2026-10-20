@@ -76,6 +76,10 @@ model Artist {
   id       Int       @id @default(autoincrement())
   name     String
   slug     String    @unique
+  // Présentation sur la page d'accueil (photo facultative, texte court FR / EN)
+  photoUrl String    @default("") @map("photo_url")
+  bio      String    @default("")
+  bioEn    String    @default("") @map("bio_en")
   artworks Artwork[]
 
   @@map("artists")
@@ -94,6 +98,17 @@ model ListOption {
 
   @@unique([kind, name])
   @@map("list_options")
+}
+
+// Textes du site modifiés en back-office. Seuls les textes changés sont stockés :
+// les autres gardent leur valeur par défaut (src/lib/dictionaries.ts).
+// `key` : chemin dans le dictionnaire, ex. « home.intro ».
+model SiteText {
+  key String @id
+  fr  String @default("")
+  en  String @default("")
+
+  @@map("site_texts")
 }
 
 model Inquiry {

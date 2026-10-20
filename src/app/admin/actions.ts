@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/session";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { OPTION_INFO, isOptionKind, normalizeDimensions } from "@/lib/options";
+import type { TextKey } from "@/lib/dictionaries";
+import { defaultText, textKeys } from "@/lib/site-texts";
 import { STATUSES, isStatus } from "@/lib/status";
 
 export type FormState = { error?: string; fieldErrors?: Record<string, string> };
@@ -224,6 +226,7 @@ export async function deleteTheme(_prev: FormState, formData: FormData): Promise
 /* ───────────── Artistes ───────────── */
 
 const artistName = z.string().trim().min(1, "Nom obligatoire.").max(120);
+const artistBio = z.string().trim().max(2000);
 
 export async function createArtist(_prev: FormState, formData: FormData): Promise<FormState> {
   await requireAdmin();
@@ -244,11 +247,35 @@ export async function updateArtist(_prev: FormState, formData: FormData): Promis
   const name = artistName.safeParse(formData.get("name"));
   if (!name.success) return { error: name.error.issues[0].message };
 
+  const bio = artistBio.safeParse(formData.get("bio") ?? "");
+  const bioEn = artistBio.safeParse(formData.get("bioEn") ?? "");
+  if (!bio.success || !bioEn.success) return { error: "Présentation trop longue (2 000 caractères maximum)." };
+
   const wanted = slugify(String(formData.get("slug") ?? "")) || slugify(name.data);
   const clash = await prisma.artist.findFirst({ where: { slug: wanted, id: { not: id } } });
   if (clash) return { error: `L'adresse « ${wanted} » est déjà utilisée par ${clash.name}.` };
 
-  await prisma.artist.update({ where: { id }, data: { name: name.data, slug: wanted } });
+  const current = await prisma.artist.findUnique({ where: { id } });
+  if (!current) return { error: "Artiste introuvable." };
+
+  // Nouvelle photo, ou suppression de l'actuelle
+  let photoUrl = current.photoUrl;
+  const photo = filesFrom(formData, "photo")[0];
+  if (photo) {
+    try {
+      photoUrl = await saveImage(photo);
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : "Image invalide." };
+    }
+  } else if (formData.get("removePhoto") === "on") {
+    photoUrl = "";
+  }
+
+  await prisma.artist.update({
+    where: { id },
+    data: { name: name.data, slug: wanted, bio: bio.data, bioEn: bioEn.data, photoUrl },
+  });
+  if (photoUrl !== current.photoUrl) await deleteImage(current.photoUrl);
   refreshSite();
   return {};
 }
@@ -260,7 +287,8 @@ export async function deleteArtist(_prev: FormState, formData: FormData): Promis
   if (count > 0) {
     return { error: `Cet artiste a ${count} œuvre${count > 1 ? "s" : ""}. Réaffectez-les avant de le supprimer.` };
   }
-  await prisma.artist.delete({ where: { id } });
+  const artist = await prisma.artist.delete({ where: { id } });
+  await deleteImage(artist.photoUrl);
   refreshSite();
   return {};
 }
@@ -339,4 +367,36 @@ export async function deleteInquiry(formData: FormData) {
   await requireAdmin();
   await prisma.inquiry.delete({ where: { id: Number(formData.get("id")) } });
   revalidatePath("/admin", "layout");
+}
+
+/* ───────────── Textes du site ───────────── */
+
+/**
+ * Enregistre les textes d'une section. Un texte identique au texte par défaut
+ * (ou vide) n'est pas stocké : il suivra les évolutions du texte par défaut.
+ */
+export async function saveSiteTexts(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const known = new Set<string>(textKeys());
+  const keys = formData.getAll("key").map(String).filter((k) => known.has(k));
+
+  for (const key of keys as TextKey[]) {
+    // Retours à la ligne normalisés (les navigateurs envoient \r\n)
+    const value = (lang: "fr" | "en") => {
+      const v = String(formData.get(`${key}:${lang}`) ?? "").replace(/\r\n?/g, "\n");
+      if (v.length > 5000) throw new Error("Texte trop long.");
+      return v.trim() === "" || v.trim() === defaultText(lang, key).trim() ? "" : v.trim();
+    };
+    let fr: string, en: string;
+    try {
+      fr = value("fr");
+      en = value("en");
+    } catch {
+      return { error: "Un texte dépasse 5 000 caractères." };
+    }
+    if (!fr && !en) await prisma.siteText.deleteMany({ where: { key } });
+    else await prisma.siteText.upsert({ where: { key }, create: { key, fr, en }, update: { fr, en } });
+  }
+  refreshSite();
+  return {};
 }

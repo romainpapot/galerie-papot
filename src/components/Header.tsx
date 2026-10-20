@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { getDictionary } from "@/lib/dictionaries";
 import { LOCALES, LOCALE_COOKIE, localePath, stripLocale, type Locale } from "@/lib/i18n";
+import { useDictionary } from "./DictionaryProvider";
 
 export function Header({ lang }: { lang: Locale }) {
   const [open, setOpen] = useState(false);
   const path = stripLocale(usePathname());
-  const t = getDictionary(lang).nav;
+  const dict = useDictionary();
+  const t = dict.nav;
 
   const links = [
     { href: "/oeuvres", label: t.artworks },
@@ -21,7 +22,7 @@ export function Header({ lang }: { lang: Locale }) {
     <header className="sticky top-0 z-40 border-b border-line/70 bg-paper/85 backdrop-blur">
       <div className="container-page flex h-16 items-center justify-between">
         <Link href={localePath(lang, "/")} className="font-serif text-2xl tracking-wide" onClick={() => setOpen(false)}>
-          Galerie Papot
+          {dict.siteName}
         </Link>
 
         <div className="flex items-center gap-6 md:gap-8">

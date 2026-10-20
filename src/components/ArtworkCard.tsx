@@ -1,16 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import type { ArtworkCardData } from "@/lib/artworks";
-import { getDictionary } from "@/lib/dictionaries";
 import { formatPrice } from "@/lib/format";
 import { localePath, type Locale } from "@/lib/i18n";
+import { useDictionary } from "./DictionaryProvider";
 import { StatusBadge } from "./StatusBadge";
 
 type Props = { artwork: ArtworkCardData; lang: Locale; priority?: boolean };
 
 export function ArtworkCard({ artwork, lang, priority = false }: Props) {
   const sold = artwork.status === "VENDU";
-  const t = getDictionary(lang).card;
+  const dict = useDictionary();
+  const t = dict.card;
 
   return (
     <Link href={localePath(lang, `/oeuvres/${artwork.slug}`)} className="group block focus-visible:outline-none">
@@ -28,7 +31,7 @@ export function ArtworkCard({ artwork, lang, priority = false }: Props) {
           />
         )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          <StatusBadge status={artwork.status} lang={lang} />
+          <StatusBadge status={artwork.status} />
           {artwork.isNew && !sold && (
             <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium tracking-wider text-ink uppercase ring-1 ring-ink/10 backdrop-blur">
               {t.new}
@@ -43,7 +46,7 @@ export function ArtworkCard({ artwork, lang, priority = false }: Props) {
         <h3 className="font-serif text-xl leading-tight group-hover:underline group-hover:underline-offset-4 decoration-1">
           {artwork.title}
         </h3>
-        <p className="text-sm text-muted">{sold ? t.sold : formatPrice(artwork.price, lang)}</p>
+        <p className="text-sm text-muted">{sold ? t.sold : formatPrice(artwork.price, lang, dict.priceOnRequest)}</p>
       </div>
     </Link>
   );

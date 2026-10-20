@@ -6,8 +6,13 @@ const priceFormatters: Record<Locale, Intl.NumberFormat> = {
   en: new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
 };
 
-export function formatPrice(price: number | null | undefined, lang: Locale = "fr") {
-  if (price == null) return getDictionary(lang).priceOnRequest;
+/** Prix formaté ; `onRequest` : texte affiché sans prix (modifiable en back-office). */
+export function formatPrice(
+  price: number | null | undefined,
+  lang: Locale = "fr",
+  onRequest = getDictionary(lang).priceOnRequest,
+) {
+  if (price == null) return onRequest;
   return priceFormatters[lang].format(price);
 }
 

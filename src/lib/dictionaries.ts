@@ -2,13 +2,17 @@ import type { ArtworkStatus } from "./status";
 import type { Locale } from "./i18n";
 
 /*
- * Textes fixes de l'interface publique, en français et en anglais.
+ * Textes par défaut de l'interface publique, en français et en anglais.
  * Le dictionnaire anglais doit avoir exactement la même forme que le français
- * (vérifié par TypeScript). Les contenus du catalogue (titres, descriptions,
- * thèmes) sont traduits dans le back-office, pas ici.
+ * (vérifié par TypeScript). Chaque texte peut être remplacé depuis le back-office
+ * (table site_texts, voir src/lib/site-texts.ts) : il ne contient donc que des
+ * chaînes. Les variables s'écrivent {nom} et sont remplies par `fill()` ; les
+ * paragraphes sont séparés par une ligne vide. Les contenus du catalogue (titres,
+ * descriptions, thèmes) sont traduits dans le back-office, pas ici.
  */
 
 const fr = {
+  siteName: "Galerie Papot",
   meta: {
     title: "Galerie Papot — Peintures originales",
     description:
@@ -43,13 +47,14 @@ const fr = {
     allArtworks: "Toutes les œuvres →",
     comingSoon: "Les premières œuvres arrivent bientôt.",
     approach: "Démarche",
-    approachText: [
-      "Chaque toile naît d'une émotion simple : la lumière d'un fruit, l'éclat d'une carrosserie, le regard d'un animal. La couleur y est un point de départ, jamais un décor.",
-      "Peintes à l'acrylique, à l'huile ou à la gouache, les œuvres sont toutes des pièces uniques, signées et accompagnées d'un certificat d'authenticité.",
-    ],
+    approachText:
+      "Chaque toile naît d'une émotion simple : la lumière d'un fruit, l'éclat d'une carrosserie, le regard d'un animal. La couleur y est un point de départ, jamais un décor.\n\nPeintes à l'acrylique, à l'huile ou à la gouache, les œuvres sont toutes des pièces uniques, signées et accompagnées d'un certificat d'authenticité.",
     contactGallery: "Contacter la galerie",
+    artists: "Les artistes",
+    artistWorks: "Voir les œuvres →",
     themes: "Thèmes",
-    artworkCount: (n: number) => `${n} œuvre${n > 1 ? "s" : ""}`,
+    artworkCountOne: "{n} œuvre",
+    artworkCountMany: "{n} œuvres",
   },
   catalogue: {
     title: "Œuvres",
@@ -63,13 +68,14 @@ const fr = {
     availability: "Disponibilité",
     all: "Toutes",
     available: "Disponibles",
-    count: (n: number) => `${n} œuvre${n > 1 ? "s" : ""}`,
+    countOne: "{n} œuvre",
+    countMany: "{n} œuvres",
     empty: "Aucune œuvre ne correspond à ces critères.",
   },
   artwork: {
     breadcrumb: "Fil d'Ariane",
     by: "par",
-    artistWorks: (name: string) => `Voir les œuvres de ${name}`,
+    artistWorks: "Voir les œuvres de {name}",
     medium: "Technique",
     support: "Support",
     dimensions: "Dimensions",
@@ -78,8 +84,8 @@ const fr = {
     statement: "Note d'intention",
     related: "Dans le même thème",
     zoom: "Agrandir l'image",
-    view: (n: number) => `Vue ${n}`,
-    viewOf: (title: string, n: number) => `${title}, vue ${n}`,
+    view: "Vue {n}",
+    viewOf: "{title}, vue {n}",
     otherViews: "Autres vues",
     close: "Fermer",
   },
@@ -100,12 +106,11 @@ const fr = {
       "Cette œuvre est vendue, mais la galerie peut vous proposer une réédition ou une création dans le même esprit.",
     introReserved: "Cette œuvre fait l'objet d'une option. Laissez vos coordonnées pour être prévenu si elle se libère.",
     introAvailable: "Vous souhaitez acquérir cette œuvre ou en savoir plus ? La galerie vous répond rapidement.",
-    reference: (title: string, ref: string) => `« ${title} » (réf. ${ref})`,
-    messageSold: (ref: string) =>
-      `Bonjour,\n\nL'œuvre ${ref} m'a beaucoup plu. Serait-il possible d'envisager une réédition ou une œuvre dans le même style ?\n\n`,
-    messageReserved: (ref: string) => `Bonjour,\n\nJe souhaite être placé en liste d'attente pour l'œuvre ${ref}.\n\n`,
-    messageAvailable: (ref: string) =>
-      `Bonjour,\n\nJe suis intéressé par l'œuvre ${ref} et souhaiterais me positionner.\n\n`,
+    reference: "« {title} » (réf. {ref})",
+    messageSold:
+      "Bonjour,\n\nL'œuvre {ref} m'a beaucoup plu. Serait-il possible d'envisager une réédition ou une œuvre dans le même style ?",
+    messageReserved: "Bonjour,\n\nJe souhaite être placé en liste d'attente pour l'œuvre {ref}.",
+    messageAvailable: "Bonjour,\n\nJe suis intéressé par l'œuvre {ref} et souhaiterais me positionner.",
     ref: "Réf.",
   },
   form: {
@@ -137,6 +142,7 @@ const fr = {
 export type Dictionary = typeof fr;
 
 const en: Dictionary = {
+  siteName: "Galerie Papot",
   meta: {
     title: "Galerie Papot — Original paintings",
     description:
@@ -171,13 +177,14 @@ const en: Dictionary = {
     allArtworks: "All artworks →",
     comingSoon: "The first works are coming soon.",
     approach: "Approach",
-    approachText: [
-      "Each canvas is born from a simple emotion: the glow of a piece of fruit, the gleam of a car's bodywork, the gaze of an animal. Colour is always the starting point, never mere decoration.",
-      "Painted in acrylic, oil or gouache, every work is a signed, one-of-a-kind piece delivered with a certificate of authenticity.",
-    ],
+    approachText:
+      "Each canvas is born from a simple emotion: the glow of a piece of fruit, the gleam of a car's bodywork, the gaze of an animal. Colour is always the starting point, never mere decoration.\n\nPainted in acrylic, oil or gouache, every work is a signed, one-of-a-kind piece delivered with a certificate of authenticity.",
     contactGallery: "Contact the gallery",
+    artists: "The artists",
+    artistWorks: "See the works →",
     themes: "Themes",
-    artworkCount: (n: number) => `${n} artwork${n > 1 ? "s" : ""}`,
+    artworkCountOne: "{n} artwork",
+    artworkCountMany: "{n} artworks",
   },
   catalogue: {
     title: "Artworks",
@@ -191,13 +198,14 @@ const en: Dictionary = {
     availability: "Availability",
     all: "All",
     available: "Available",
-    count: (n: number) => `${n} artwork${n > 1 ? "s" : ""}`,
+    countOne: "{n} artwork",
+    countMany: "{n} artworks",
     empty: "No artwork matches these criteria.",
   },
   artwork: {
     breadcrumb: "Breadcrumb",
     by: "by",
-    artistWorks: (name: string) => `See works by ${name}`,
+    artistWorks: "See works by {name}",
     medium: "Medium",
     support: "Support",
     dimensions: "Dimensions",
@@ -206,8 +214,8 @@ const en: Dictionary = {
     statement: "Artist's statement",
     related: "More in this theme",
     zoom: "Enlarge image",
-    view: (n: number) => `View ${n}`,
-    viewOf: (title: string, n: number) => `${title}, view ${n}`,
+    view: "View {n}",
+    viewOf: "{title}, view {n}",
     otherViews: "Other views",
     close: "Close",
   },
@@ -227,11 +235,10 @@ const en: Dictionary = {
     introSold: "This work has been sold, but the gallery can offer you a new edition or a creation in the same spirit.",
     introReserved: "This work is currently on hold. Leave your details to be notified if it becomes available.",
     introAvailable: "Would you like to acquire this work or find out more? The gallery will get back to you quickly.",
-    reference: (title: string, ref: string) => `“${title}” (ref. ${ref})`,
-    messageSold: (ref: string) =>
-      `Hello,\n\nI really liked the work ${ref}. Would a new edition or a work in the same style be possible?\n\n`,
-    messageReserved: (ref: string) => `Hello,\n\nI would like to be placed on the waiting list for the work ${ref}.\n\n`,
-    messageAvailable: (ref: string) => `Hello,\n\nI am interested in the work ${ref} and would like to express my interest.\n\n`,
+    reference: "“{title}” (ref. {ref})",
+    messageSold: "Hello,\n\nI really liked the work {ref}. Would a new edition or a work in the same style be possible?",
+    messageReserved: "Hello,\n\nI would like to be placed on the waiting list for the work {ref}.",
+    messageAvailable: "Hello,\n\nI am interested in the work {ref} and would like to express my interest.",
     ref: "Ref.",
   },
   form: {
@@ -262,6 +269,28 @@ const en: Dictionary = {
 
 const dictionaries: Record<Locale, Dictionary> = { fr, en };
 
+/** Textes par défaut (sans les modifications du back-office : voir getTranslations côté serveur). */
 export function getDictionary(lang: Locale) {
   return dictionaries[lang];
+}
+
+/** Clés des textes, ex. « home.intro » ou « form.errors.name ». */
+type Leaves<T, P extends string = ""> = {
+  [K in keyof T & string]: T[K] extends string ? `${P}${K}` : Leaves<T[K], `${P}${K}.`>;
+}[keyof T & string];
+export type TextKey = Leaves<Dictionary>;
+
+/** Remplace les variables {nom} d'un texte. */
+export function fill(template: string, vars: Record<string, string | number>) {
+  return template.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k]) : m));
+}
+
+/** Choisit la forme singulier / pluriel (« 0 œuvre », « 2 œuvres ») et remplit {n}. */
+export function plural(n: number, one: string, many: string) {
+  return fill(n > 1 ? many : one, { n });
+}
+
+/** Paragraphes d'un texte long (séparés par une ligne vide). */
+export function paragraphs(text: string) {
+  return text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 }

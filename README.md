@@ -67,7 +67,10 @@ dans l'en-tête et le choix est mémorisé (cookie `lang`). À la première visi
 navigateur réglé dans une autre langue que le français est dirigé vers l'anglais.
 Chaque page indique à Google sa version dans l'autre langue (balises `hreflang`).
 
-- Textes fixes (menus, boutons, statuts, formulaire) : `src/lib/dictionaries.ts`.
+- Textes de l'interface (accueil, démarche, menus, boutons, statuts, formulaire…) :
+  modifiables dans « Textes » du back-office, en français et en anglais. Les
+  valeurs par défaut sont dans `src/lib/dictionaries.ts` ; seuls les textes
+  modifiés sont enregistrés en base (table `site_texts`).
 - Contenus du catalogue : dans le back-office, chaque œuvre a une section
   « Version anglaise » (titre, note d'intention), chaque thème un nom anglais, et
   chaque type de peinture et support un nom anglais dans « Listes ». Tout est facultatif : un champ vide affiche le texte français.
@@ -78,9 +81,10 @@ Chaque page indique à Google sa version dans l'autre langue (balises `hreflang`
 ## Artistes et listes
 
 La galerie expose plusieurs artistes : la page « Artistes » du back-office les
-gère (nom, adresse du filtre `/oeuvres?artiste=…`). Le nom figure sur la fiche de
-l'œuvre (« par … ») et le catalogue propose un filtre par artiste dès qu'un artiste
-a au moins une œuvre.
+gère (nom, photo, présentation en français et en anglais, adresse du filtre
+`/oeuvres?artiste=…`). Ils sont présentés sur la page d'accueil (section « Les
+artistes »), le nom figure sur la fiche de l'œuvre (« par … ») et le catalogue
+propose un filtre par artiste dès qu'un artiste a au moins une œuvre.
 
 Le type de peinture, le support et les dimensions se choisissent dans des listes
 déroulantes, pour un nommage identique d'une œuvre à l'autre. Les valeurs se gèrent

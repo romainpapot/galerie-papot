@@ -13,16 +13,24 @@ export default async function AdminArtists() {
     <div className="max-w-4xl space-y-6">
       <h1 className="font-serif text-4xl">Artistes</h1>
       <p className="text-sm text-muted">
-        Artistes exposés par la galerie. Sur le site, le nom apparaît sur la fiche de l&apos;œuvre et le catalogue
-        peut être filtré par artiste.
+        Artistes exposés par la galerie. Ils sont présentés sur la page d&apos;accueil (photo, nom et présentation) ;
+        le nom apparaît aussi sur la fiche de l&apos;œuvre et le catalogue peut être filtré par artiste.
       </p>
       <NewArtistForm />
       {artists.length ? (
         <ul className="divide-y divide-line rounded-lg border border-line bg-white">
           {artists.map((a) => (
             <ArtistRow
-              key={`${a.id}-${a.name}-${a.slug}`}
-              artist={{ id: a.id, name: a.name, slug: a.slug, count: a._count.artworks }}
+              key={`${a.id}-${a.name}-${a.slug}-${a.photoUrl}-${a.bio}-${a.bioEn}`}
+              artist={{
+                id: a.id,
+                name: a.name,
+                slug: a.slug,
+                photoUrl: a.photoUrl,
+                bio: a.bio,
+                bioEn: a.bioEn,
+                count: a._count.artworks,
+              }}
             />
           ))}
         </ul>

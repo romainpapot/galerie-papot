@@ -24,7 +24,7 @@ l'installation et l'organisation du code.
   `ArtworkAction` (bouton de contact) et `ArtworkCard` (œuvre vendue grisée).
 - Type de peinture, support et dimensions : listes gérées en back-office (table
   `list_options`, champ `kind` validé dans `src/lib/options.ts`), reliées à l'œuvre par
-  `mediumId` / `supportId` / `dimensionsId`. Artiste : table `artists` (`artistId`).
+  `mediumId` / `supportId` / `dimensionsId`. Artiste : table `artists` (`artistId`, photo `photoUrl`, présentation `bio` / `bioEn`).
   Les champs `legacy…` d'`Artwork` sont les anciens textes libres, repris par
   `npm run db:migrer-listes` : ne plus les utiliser.
 - Références lisibles `GP-0001` calculées depuis l'id (`src/lib/format.ts`).
@@ -40,9 +40,13 @@ l'installation et l'organisation du code.
   helpers dans `src/lib/analytics.ts`), agrégation en mémoire dans `src/lib/stats.ts`.
 - Après une modification du catalogue, appeler `revalidatePath("/", "layout")`.
 - Site public bilingue : pages dans `src/app/[lang]/` (`fr` sans préfixe d'URL, `en` sous
-  `/en`, aiguillage dans `src/proxy.ts`). Textes fixes dans `src/lib/dictionaries.ts`
-  (FR et EN, même forme) ; côté serveur `getTranslations()` (`src/lib/locale.ts`), côté
-  client passer `lang` en prop. Liens internes via `localePath(lang, "/…")` (`src/lib/i18n.ts`).
+  `/en`, aiguillage dans `src/proxy.ts`). Textes par défaut dans `src/lib/dictionaries.ts`
+  (FR et EN, même forme, chaînes uniquement : variables `{n}` remplies par `fill()` /
+  `plural()`, paragraphes séparés par une ligne vide). Tous sont modifiables en
+  back-office (« Textes », table `site_texts`, `src/lib/site-texts.ts`) : un nouveau texte
+  doit être décrit dans `src/app/admin/(protected)/textes/sections.ts`. Côté serveur
+  `getTranslations()` (`src/lib/locale.ts`), côté client `useDictionary()`
+  (`DictionaryProvider`) ; ne pas lire `getDictionary()` sur le site (textes non modifiés). Liens internes via `localePath(lang, "/…")` (`src/lib/i18n.ts`).
 - Contenus traduits en base : champs `…En` (œuvre) et `nameEn` (thème, valeur de liste),
   facultatifs, lus via `localizeArtwork` / `themeName` / `optionName` / `toCard(a, lang)`
   avec repli sur le français.

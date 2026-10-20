@@ -2,11 +2,12 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
-import { getDictionary, type Dictionary } from "@/lib/dictionaries";
+import type { Dictionary } from "@/lib/dictionaries";
 import { artworkReference, formatPrice } from "@/lib/format";
 import { toLocale } from "@/lib/i18n";
 import { notifyGallery } from "@/lib/mail";
 import { prisma } from "@/lib/prisma";
+import { getSiteDictionary } from "@/lib/site-texts";
 import { STATUS_LABELS, toStatus } from "@/lib/status";
 
 export type ContactState = {
@@ -46,7 +47,7 @@ export async function sendInquiry(_prev: ContactState, formData: FormData): Prom
   );
 
   const lang = toLocale(formData.get("lang"));
-  const t = getDictionary(lang).form;
+  const t = (await getSiteDictionary(lang)).form;
 
   // Champ piège invisible : rempli uniquement par les robots
   if (formData.get("website")) return { ok: true };

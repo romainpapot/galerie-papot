@@ -3,7 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArtworkCard } from "@/components/ArtworkCard";
 import { localizeArtwork, themeName, toCard } from "@/lib/artworks";
-import { alternates, localePath } from "@/lib/i18n";
+import { paragraphs, plural } from "@/lib/dictionaries";
+import { alternates, localePath, pick } from "@/lib/i18n";
 import { getLocale, getTranslations } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
 
@@ -15,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const { lang, t } = await getTranslations();
-  const [flagged, themes] = await Promise.all([
+  const [flagged, themes, artists] = await Promise.all([
     prisma.artwork.findMany({
       where: { isNew: true },
       include: { theme: true, medium: true },
@@ -29,6 +30,7 @@ export default async function HomePage() {
         _count: { select: { artworks: true } },
       },
     }),
+    prisma.artist.findMany({ orderBy: { name: "asc" }, include: { _count: { select: { artworks: true } } } }),
   ]);
 
   // Sans œuvre marquée « Nouveauté », on montre les derniers ajouts
@@ -109,8 +111,8 @@ export default async function HomePage() {
         <div className="container-page grid gap-10 md:grid-cols-[1fr_2fr]">
           <h2 className="font-serif text-4xl">{t.home.approach}</h2>
           <div className="max-w-2xl space-y-5 text-lg leading-relaxed text-ink/80">
-            {t.home.approachText.map((p) => (
-              <p key={p}>{p}</p>
+            {paragraphs(t.home.approachText).map((p, i) => (
+              <p key={i} className="whitespace-pre-line">{p}</p>
             ))}
             <Link href={localePath(lang, "/contact")} className="inline-block text-base text-ink underline underline-offset-4">
               {t.home.contactGallery}
@@ -118,6 +120,49 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Artistes */}
+      {artists.length > 0 && (
+        <section id="artistes" className="container-page scroll-mt-20 pt-20">
+          <h2 className="mb-8 font-serif text-4xl">{t.home.artists}</h2>
+          <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {artists.map((artist) => {
+              const bio = pick(lang, artist.bio, artist.bioEn);
+              return (
+                <article key={artist.id}>
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-line">
+                    {artist.photoUrl ? (
+                      <Image
+                        src={artist.photoUrl}
+                        alt={artist.name}
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="absolute inset-0 grid place-items-center font-serif text-7xl text-muted/60" aria-hidden>
+                        {artist.name.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="mt-4 font-serif text-2xl">{artist.name}</h3>
+                  {paragraphs(bio).map((p, i) => (
+                    <p key={i} className="mt-2 leading-relaxed whitespace-pre-line text-ink/80">{p}</p>
+                  ))}
+                  {artist._count.artworks > 0 && (
+                    <Link
+                      href={localePath(lang, `/oeuvres?artiste=${artist.slug}`)}
+                      className="mt-3 inline-block text-sm text-muted underline underline-offset-4 hover:text-ink"
+                    >
+                      {t.home.artistWorks}
+                    </Link>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Thèmes */}
       {themes.length > 0 && (
@@ -143,7 +188,7 @@ export default async function HomePage() {
                 <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                   <p className="font-serif text-2xl">{themeName(theme, lang)}</p>
                   <p className="text-xs tracking-wider uppercase opacity-80">
-                    {t.home.artworkCount(theme._count.artworks)}
+                    {plural(theme._count.artworks, t.home.artworkCountOne, t.home.artworkCountMany)}
                   </p>
                 </div>
               </Link>

@@ -3,10 +3,11 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { ArtworkCardData } from "@/lib/artworks";
-import { getDictionary } from "@/lib/dictionaries";
+import { plural } from "@/lib/dictionaries";
 import type { Locale } from "@/lib/i18n";
 import type { ArtworkStatus } from "@/lib/status";
 import { ArtworkCard } from "./ArtworkCard";
+import { useDictionary } from "./DictionaryProvider";
 
 type Props = {
   artworks: ArtworkCardData[];
@@ -17,7 +18,7 @@ type Props = {
 
 /** Filtrage instantané côté client, synchronisé avec l'URL (?theme=…&artiste=…). */
 export function Catalogue({ artworks, themes, artists, lang }: Props) {
-  const t = getDictionary(lang).catalogue;
+  const t = useDictionary().catalogue;
   const availability: { value: "" | ArtworkStatus; label: string }[] = [
     { value: "", label: t.all },
     { value: "DISPONIBLE", label: t.available },
@@ -118,7 +119,7 @@ export function Catalogue({ artworks, themes, artists, lang }: Props) {
       </div>
 
       <p className="mb-6 text-sm text-muted" aria-live="polite">
-        {t.count(visible.length)}
+        {plural(visible.length, t.countOne, t.countMany)}
       </p>
 
       {visible.length ? (

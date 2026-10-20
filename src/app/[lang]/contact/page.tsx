@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ContactForm } from "@/components/ContactForm";
 import { StatusBadge } from "@/components/StatusBadge";
 import { localizeArtwork } from "@/lib/artworks";
+import { fill } from "@/lib/dictionaries";
 import { artworkReference, formatPrice } from "@/lib/format";
 import { alternates, localePath } from "@/lib/i18n";
 import { getTranslations } from "@/lib/locale";
@@ -29,18 +30,21 @@ export default async function ContactPage(props: PageProps<"/[lang]/contact">) {
   let defaultMessage = "";
   let intro = t.contact.intro;
   if (artwork && title) {
-    const ref = t.contact.reference(title, artworkReference(artwork.id));
+    const ref = fill(t.contact.reference, { title, ref: artworkReference(artwork.id) });
     const status = toStatus(artwork.status);
+    let message: string;
     if (status === "VENDU" || subject === "similaire") {
       intro = t.contact.introSold;
-      defaultMessage = t.contact.messageSold(ref);
+      message = t.contact.messageSold;
     } else if (status === "RESERVE" || subject === "attente") {
       intro = t.contact.introReserved;
-      defaultMessage = t.contact.messageReserved(ref);
+      message = t.contact.messageReserved;
     } else {
       intro = t.contact.introAvailable;
-      defaultMessage = t.contact.messageAvailable(ref);
+      message = t.contact.messageAvailable;
     }
+    // Le curseur se place après le texte proposé, sur une ligne libre
+    defaultMessage = `${fill(message, { ref }).trimEnd()}\n\n`;
   }
 
   return (
@@ -59,9 +63,9 @@ export default async function ContactPage(props: PageProps<"/[lang]/contact">) {
             <div className="min-w-0">
               <p className="truncate font-serif text-xl">{title}</p>
               <p className="text-sm text-muted">
-                {t.contact.ref} {artworkReference(artwork.id)} · {formatPrice(artwork.price, lang)}
+                {t.contact.ref} {artworkReference(artwork.id)} · {formatPrice(artwork.price, lang, t.priceOnRequest)}
               </p>
-              <StatusBadge status={toStatus(artwork.status)} lang={lang} className="mt-1 !bg-transparent !px-0 !ring-0" />
+              <StatusBadge status={toStatus(artwork.status)} className="mt-1 !bg-transparent !px-0 !ring-0" />
             </div>
           </Link>
         )}

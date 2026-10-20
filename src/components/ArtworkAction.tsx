@@ -1,11 +1,20 @@
 import Link from "next/link";
-import { getDictionary } from "@/lib/dictionaries";
+import type { Dictionary } from "@/lib/dictionaries";
 import { localePath, type Locale } from "@/lib/i18n";
 import type { ArtworkStatus } from "@/lib/status";
 
 /** Bouton de contact conditionné par le statut de l'œuvre. */
-export function ArtworkAction({ id, status, lang }: { id: number; status: ArtworkStatus; lang: Locale }) {
-  const t = getDictionary(lang).action;
+export function ArtworkAction({
+  id,
+  status,
+  lang,
+  t,
+}: {
+  id: number;
+  status: ArtworkStatus;
+  lang: Locale;
+  t: Dictionary["action"];
+}) {
   const contact = (query: string) => localePath(lang, `/contact?${query}`);
 
   switch (status) {

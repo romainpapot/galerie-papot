@@ -2,13 +2,13 @@
 
 import { useActionState } from "react";
 import { sendInquiry, type ContactState } from "@/app/[lang]/contact/actions";
-import { getDictionary } from "@/lib/dictionaries";
 import type { Locale } from "@/lib/i18n";
+import { useDictionary } from "./DictionaryProvider";
 
 type Props = { artworkId?: number; defaultMessage: string; lang: Locale };
 
 export function ContactForm({ artworkId, defaultMessage, lang }: Props) {
-  const t = getDictionary(lang).form;
+  const t = useDictionary().form;
   const [state, action, pending] = useActionState<ContactState, FormData>(sendInquiry, { ok: false });
 
   if (state.ok) {

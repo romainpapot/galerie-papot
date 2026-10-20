@@ -12,6 +12,7 @@ export function AdminNav({ unread }: { unread: number }) {
     { href: "/admin/artistes", label: "Artistes" },
     { href: "/admin/themes", label: "Thèmes" },
     { href: "/admin/listes", label: "Listes" },
+    { href: "/admin/textes", label: "Textes" },
     { href: "/admin/demandes", label: "Demandes", badge: unread },
   ];
 

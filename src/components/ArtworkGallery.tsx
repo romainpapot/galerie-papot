@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { getDictionary } from "@/lib/dictionaries";
-import type { Locale } from "@/lib/i18n";
+import { fill } from "@/lib/dictionaries";
+import { useDictionary } from "./DictionaryProvider";
 
-type Props = { images: string[]; title: string; lang: Locale; muted?: boolean };
+type Props = { images: string[]; title: string; muted?: boolean };
 
-export function ArtworkGallery({ images, title, lang, muted }: Props) {
-  const t = getDictionary(lang).artwork;
+export function ArtworkGallery({ images, title, muted }: Props) {
+  const t = useDictionary().artwork;
   const [index, setIndex] = useState(0);
   const dialog = useRef<HTMLDialogElement>(null);
   const current = images[index];
@@ -24,7 +24,7 @@ export function ArtworkGallery({ images, title, lang, muted }: Props) {
       >
         <Image
           src={current}
-          alt={index === 0 ? title : t.viewOf(title, index + 1)}
+          alt={index === 0 ? title : fill(t.viewOf, { title, n: index + 1 })}
           fill
           priority
           quality={90}
@@ -41,7 +41,7 @@ export function ArtworkGallery({ images, title, lang, muted }: Props) {
               type="button"
               role="tab"
               aria-selected={i === index}
-              aria-label={t.view(i + 1)}
+              aria-label={fill(t.view, { n: i + 1 })}
               onClick={() => setIndex(i)}
               className={`relative size-20 shrink-0 overflow-hidden rounded-sm bg-white ring-offset-2 transition ${
                 i === index ? "ring-1 ring-ink" : "opacity-60 hover:opacity-100"
